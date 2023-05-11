@@ -66,14 +66,14 @@ async function resetSshKey() {
 
 function updateSshConfig() {
   const markers = {
-    start: '### Start of DEVBOX config block',
+    start: '### Start of DEVBOX config block ###',
     notice: [
       '################################################################################################',
       '### ****                             IMPORTANT NOTICE                                   **** ###',
       '### ****    Any custom config inside of the DEVBOX config block will be overridden!     **** ###',
       '################################################################################################',
     ],
-    end: '### End of DEVBOX config block',
+    end: '### End of DEVBOX config block ###',
   };
   const sshConfig = new TextFile(os.homedir(), '.ssh/config');
 

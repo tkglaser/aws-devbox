@@ -14,8 +14,8 @@ const env = {
 };
 
 const { vpc, vpcSubnet } = new DevboxVpcStack(app, 'DevboxVpcStack', { env });
-const { volume, awsConfig } = new DevboxStorageStack(app, 'DevboxStorageStack', { env, vpc, vpcSubnet });
-const { instanceRole } = new DevboxStack(app, 'DevboxStack', { env, vpc, vpcSubnet, volume, awsConfig });
+const { volume } = new DevboxStorageStack(app, 'DevboxStorageStack', { env, vpc, vpcSubnet });
+const { instanceRole } = new DevboxStack(app, 'DevboxStack', { env, vpc, vpcSubnet, volume });
 
 for (const deploymentAccount of config.deploymentAccounts) {
   new DevboxDeploymentStack(app, 'DevboxDeploymentStack', { instanceRole, env: { account: deploymentAccount.id } });

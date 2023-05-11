@@ -9,26 +9,24 @@ import {
   Peer,
   Port,
   SecurityGroup,
-  SubnetType,
+  UserData,
   Volume,
   Vpc,
 } from 'aws-cdk-lib/aws-ec2';
 import { Rule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { IRole, ManagedPolicy, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { Asset } from 'aws-cdk-lib/aws-s3-assets';
 import { Construct } from 'constructs';
 
 import { config } from '../config/config';
-import { DevboxUserData } from '../util/devbox-userdata';
-import { SwitchOffLambda } from './constructs/switch-off/switch-off.lambda';
 import { NetworkingMode } from '../models/config';
+import { SwitchOffLambda } from './constructs/switch-off/switch-off.lambda';
+import { install } from './installations';
 
 export interface DevboxStackProps extends StackProps {
   vpc: Vpc;
   vpcSubnet: ISubnet;
   volume: Volume;
-  awsConfig: Asset;
 }
 
 export class DevboxStack extends Stack {
@@ -42,28 +40,17 @@ export class DevboxStack extends Stack {
       managedPolicies: [ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore')],
     });
 
-    const userData = new DevboxUserData({ user: config.user });
+    const userData = UserData.forLinux();
 
-    userData.installGlobalTools({ userName: config.userName, email: config.email });
-    userData.createUser();
-    userData.copyKeys({ fromUser: config.instance.defaultUser ?? 'ubuntu' });
-    userData.mountExternalVolume({
-      targetDevice: '/dev/sdf',
-      internalDevice: '/dev/nvme1n1', // EBS optimised is mounted as NVMe
-      volume: props.volume,
-      path: config.instance.volumeMountTarget ?? `/home/${config.user}/projects`,
-      region: Stack.of(this).region,
-    });
-
-    userData.copyAwsConfig({ from: props.awsConfig, readerRole: instanceRole });
+    install(userData, { scope: this, volume: props.volume, instanceRole });
 
     const machineImage = MachineImage.fromSsmParameter(config.instance.amiSsmParameter, {
       os: OperatingSystemType.LINUX,
-      userData: userData.data,
+      userData: userData,
     });
 
     const securityGroup = new SecurityGroup(this, 'SecurityGroup', {
-      description: 'DevBox SG',
+      description: 'devbox security group',
       vpc: props.vpc,
       allowAllOutbound: true,
     });
@@ -74,6 +61,7 @@ export class DevboxStack extends Stack {
     }
 
     const inst = new Instance(this, 'DevBox', {
+      instanceName: 'devbox',
       vpc: props.vpc,
       vpcSubnets: { subnets: [props.vpcSubnet] },
       securityGroup,
@@ -95,7 +83,7 @@ export class DevboxStack extends Stack {
       ],
     });
 
-    userData.data.addSignalOnExitCommand(inst);
+    userData.addSignalOnExitCommand(inst);
 
     props.volume.grantAttachVolumeByResourceTag(inst.grantPrincipal, [inst]);
 

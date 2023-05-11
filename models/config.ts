@@ -138,24 +138,6 @@ export interface Config {
   };
 
   /**
-   * Tools to install on the instance
-   */
-  tools: {
-
-    /**
-     * Tools to install via aptitude.
-     * 
-     * @example `["git", "awscli", "nodejs"]`
-     */
-    apt: string[];
-
-    /**
-     * Tools to install globally via NPM
-     */
-    npm: string[];
-  };
-
-  /**
    * The AWS account where the devbox will reside.
    */
   account: Account;

@@ -51,10 +51,6 @@ export const config: Config = {
     name: 'my-key-name',
     file: '/path/to/my-key-name.pem',
   },
-  tools: {
-    apt: ['locales', 'git', 'awscli', 'unison', 'nodejs', 'nano', 'mc', 'python3.10-venv'], // installed via apt-get install
-    npm: ['pnpm', '@microsoft/rush', 'aws-cdk'], // installed via npm i -g
-  },
   deploymentAccounts: [
     {
       id: '210987654321',
