@@ -1,0 +1,43 @@
+import * as superagent from 'superagent';
+
+import { config } from '../config/config';
+import { JsonFile } from '../util/json-file';
+import { TextFile } from '../util/text-file';
+
+function getIpAndSaveToContext() {
+  console.log('Checking public IP...');
+  superagent.get('api.ipify.org/?format=json').end((err, res) => {
+    if (err) {
+      console.error(err);
+      process.exit(1);
+    }
+
+    console.log(`Public IP is ${res.body.ip}`);
+
+    const cdkContext = new JsonFile<{ currentPublicIp: string }>(__dirname, '../cdk.context.json');
+    cdkContext.content = {
+      ...cdkContext.content,
+      currentPublicIp: res.body.ip,
+    };
+  });
+}
+
+function renderAwsConfig() {
+  console.log('Rendering AWS config...');
+  const awsConfig: string[] = [];
+  for (const deploymentAccount of config.deploymentAccounts) {
+    awsConfig.push(
+      `[profile ${deploymentAccount.profile}]`,
+      `role_arn = arn:aws:iam::${deploymentAccount.id}:role/devbox-deployment-role`,
+      `credential_source = Ec2InstanceMetadata`,
+      ``,
+    );
+  }
+
+  const awsConfigFile = new TextFile(__dirname, '../assets/aws.config');
+  awsConfigFile.content = awsConfig;
+  console.log('Rendering AWS config done.');
+}
+
+renderAwsConfig();
+getIpAndSaveToContext();
