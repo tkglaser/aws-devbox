@@ -21,7 +21,7 @@ You need to create a key pair in the AWS console. Make a note of the name of tha
 ### AWS CLI and Session Manager Plugin
 You need the AWS CLI to deploy the solution [Installing or updating the latest version of the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html). If you wish to use the AWS CLI Session Manager you need to [install the relevant plugin](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html).
 
-We recommend that you used the Session Manager plugin and that you connect this way. But if you can't use the plugin, you can configure the solution to use public IP access instead.
+We recommend that you use the Session Manager plugin for connecting. But if you can't use the plugin, you can configure the solution to use public IP access instead.
 
 ### Create a configuration file
 Create a file in `config/config.ts`. For example, like this:
