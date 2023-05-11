@@ -22,6 +22,7 @@ import { Construct } from 'constructs';
 import { config } from '../config/config';
 import { DevboxUserData } from '../util/devbox-userdata';
 import { SwitchOffLambda } from './constructs/switch-off/switch-off.lambda';
+import { NetworkingMode } from '../models/config';
 
 export interface DevboxStackProps extends StackProps {
   vpc: Vpc;
@@ -67,9 +68,10 @@ export class DevboxStack extends Stack {
       allowAllOutbound: true,
     });
 
-    const publicIp = this.node.getContext('currentPublicIp');
-
-    securityGroup.addIngressRule(Peer.ipv4(`${publicIp}/32`), Port.tcp(22));
+    if (config.networkingMode === NetworkingMode.PUBLIC_IP) {
+      const publicIp = this.node.getContext('currentPublicIp');
+      securityGroup.addIngressRule(Peer.ipv4(`${publicIp}/32`), Port.tcp(22));
+    }
 
     const inst = new Instance(this, 'DevBox', {
       vpc: props.vpc,

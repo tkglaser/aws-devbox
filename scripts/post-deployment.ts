@@ -9,10 +9,13 @@ import { env } from '../lib/env';
 import { ec2Client } from '../util/client';
 import { JsonFile } from '../util/json-file';
 import { runCommand } from '../util/run-command';
+import { TextFile } from '../util/text-file';
+import { NetworkingMode } from '../models/config';
 
 async function main() {
   saveInstanceIdToEnv();
   await startInstance();
+  updateSshConfig();
   await resetSshKey();
 }
 
@@ -38,9 +41,16 @@ async function startInstance() {
 
   console.log('Instance is running');
 
-  const describeResult = await ec2.describeInstances(params);
+  if (config.networkingMode === NetworkingMode.PUBLIC_IP) {
+    const describeResult = await ec2.describeInstances(params);
 
-  saveValueToEnv('DEVBOX_IP', describeResult.Reservations![0].Instances![0].PublicIpAddress!);
+    const publicIp = describeResult.Reservations![0].Instances![0].PublicIpAddress!;
+    if (typeof publicIp === 'undefined') {
+      throw new Error('Unable to determine IP!');
+    }
+
+    saveValueToEnv('DEVBOX_IP', publicIp);
+  }
 }
 
 async function resetSshKey() {
@@ -55,16 +65,51 @@ async function resetSshKey() {
   });
 }
 
+function updateSshConfig() {
+  const markers = {
+    start: '### Start of DEVBOX config block',
+    notice: [
+      '################################################################################################',
+      '### ****                             IMPORTANT NOTICE                                   **** ###',
+      '### ****    Any custom config inside of the DEVBOX config block will be overridden!     **** ###',
+      '################################################################################################',
+    ],
+    end: '### End of DEVBOX config block',
+  };
+  const sshConfig = new TextFile(os.homedir(), '.ssh/config');
+
+  const devboxConfig: string[] = [];
+  if (config.networkingMode === NetworkingMode.AWS_SSM) {
+    devboxConfig.push(
+      'Host devbox',
+      `  HostName ${env().instanceId}`,
+      `  ProxyCommand sh -c "aws --profile ${config.account.profile} ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'"`,
+    );
+  } else {
+    devboxConfig.push('Host devbox', `  HostName ${env().instanceIp}`);
+  }
+
+  const restOfConfig: string[] = [];
+  let insideConfig = false;
+  for (const line of sshConfig.content) {
+    if (line === markers.start) {
+      insideConfig = true;
+    } else if (line === markers.end) {
+      insideConfig = false;
+    } else if (!insideConfig) {
+      restOfConfig.push(line);
+    }
+  }
+
+  sshConfig.content = [markers.start, '', ...markers.notice, '', ...devboxConfig, '', markers.end, ...restOfConfig];
+}
+
 function saveValueToEnv(name: string, value: string) {
-  const envFileName = path.join(__dirname, '../.env');
-  const env = dotenv.parse(fs.readFileSync(envFileName));
+  const envFile = new TextFile(__dirname, '../.env');
+  const env = dotenv.parse(envFile.content.join('\n'));
 
   env[name] = value;
 
-  const stringifiedEnv = Object.entries(env)
-    .map(([key, value]) => `${key}=${value}`)
-    .join('\n');
-
-  fs.writeFileSync(envFileName, stringifiedEnv);
-  dotenv.config();
+  envFile.content = Object.entries(env).map(([key, value]) => `${key}=${value}`);
+  dotenv.config({ path: path.join(__dirname, '../.env'), override: true });
 }

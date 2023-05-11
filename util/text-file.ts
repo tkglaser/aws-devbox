@@ -12,7 +12,16 @@ export class TextFile {
 
   get content() {
     if (!this.hasBeenRead) {
-      this._content = fs.readFileSync(this.fileName).toString('utf8').split('\n');
+      try {
+        this._content = fs.readFileSync(this.fileName).toString('utf8').split('\n');
+      } catch (e) {
+        if ((e as { code: 'ENOENT' }).code === 'ENOENT') {
+          // doesn't exist yet, setting empty content
+          this._content = [];
+        } else {
+          throw e;
+        }
+      }
       this.hasBeenRead = true;
     }
     return this._content;

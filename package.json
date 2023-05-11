@@ -2,11 +2,10 @@
   "name": "devbox",
   "version": "0.1.0",
   "scripts": {
-    "start": "npm run pre-deployment && npm run bootstrap && npm run deploy && npm run post-deployment && npm run sethosts",
+    "start": "npm run pre-deployment && npm run bootstrap && npm run deploy && npm run post-deployment",
     "stop": "ts-node -r dotenv/config scripts/stop.ts",
     "bootstrap": "ts-node ./scripts/bootstrap.ts",
     "destroy": "ts-node scripts/destroy.ts",
-    "sethosts": "sudo npx ts-node -r dotenv/config scripts/set-hosts.ts",
     "pre-deployment": "ts-node ./scripts/pre-deployment.ts",
     "deploy": "ts-node scripts/deploy.ts",
     "post-deployment": "ts-node ./scripts/post-deployment.ts",

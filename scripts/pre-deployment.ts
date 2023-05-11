@@ -3,6 +3,16 @@ import * as superagent from 'superagent';
 import { config } from '../config/config';
 import { JsonFile } from '../util/json-file';
 import { TextFile } from '../util/text-file';
+import { NetworkingMode } from '../models/config';
+
+function main() {
+  renderAwsConfig();
+  if (config.networkingMode === NetworkingMode.PUBLIC_IP) {
+    getIpAndSaveToContext();
+  }
+}
+
+main();
 
 function getIpAndSaveToContext() {
   console.log('Checking public IP...');
@@ -38,6 +48,3 @@ function renderAwsConfig() {
   awsConfigFile.content = awsConfig;
   console.log('Rendering AWS config done.');
 }
-
-renderAwsConfig();
-getIpAndSaveToContext();
