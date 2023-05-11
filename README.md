@@ -101,4 +101,4 @@ This means that aws cli commands like the following will work on the devbox:
 aws --profile my-other-account s3 ls
 ```
 
-Note that the role in the deployment account is called `devbox-deployment-role`. Which permissions the role has, can be changed in `lib/devbox-deployment-stack.ts`.
+Note that the role in the deployment account is called `devbox-deployment-role`. Which permissions the role has can be changed in `lib/devbox-deployment-stack.ts`.
