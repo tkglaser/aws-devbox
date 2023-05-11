@@ -1,7 +1,7 @@
 import { InstanceClass, InstanceSize, InstanceType } from 'aws-cdk-lib/aws-ec2';
 import { Schedule } from 'aws-cdk-lib/aws-events';
 
-import { Config } from '../models/config';
+import { Config, NetworkingMode } from '../models/config';
 
 /**
  * Example config, create a `config.ts` file in the current folder.
@@ -11,6 +11,7 @@ export const config: Config = {
   user: 'useronbox',
   userName: 'John Doe',
   email: 'john@example.com',
+  networkingMode: NetworkingMode.AWS_SSM,
   account: {
     id: '123456789012',
     profile: 'my-dev-account',
