@@ -1,16 +1,15 @@
 import { waitUntilInstanceStatusOk } from '@aws-sdk/client-ec2';
 import * as dotenv from 'dotenv';
-import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
 import { config } from '../config/config';
 import { env } from '../lib/env';
+import { NetworkingMode } from '../models/config';
 import { ec2Client } from '../util/client';
 import { JsonFile } from '../util/json-file';
 import { runCommand } from '../util/run-command';
 import { TextFile } from '../util/text-file';
-import { NetworkingMode } from '../models/config';
 
 async function main() {
   saveInstanceIdToEnv();

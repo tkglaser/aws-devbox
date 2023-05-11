@@ -31,7 +31,7 @@ export const enum NetworkingMode {
    * @see https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html
    *
    * The devbox instance will be installed into a private subnet and will not
-   * be not directly reachable from the public internet.
+   * be directly reachable from the public internet.
    */
   AWS_SSM,
 
@@ -50,7 +50,7 @@ export const enum NetworkingMode {
 export interface Config {
   /**
    * The user you wish to log in as. It makes sense to set this to the same user name as
-   * your physical computer to minimise friction.
+   * you use on your physical computer to minimise friction.
    */
   user: string;
 
