@@ -10,7 +10,64 @@ const version = '1.78.1';
 
 const configDir = '.openvscode-server';
 
+const extensions = [
+  'andys8.jest-snippets',
+  'drknoxy.eslint-disable-snippets',
+  'dsznajder.es7-react-js-snippets',
+  'ecmel.vscode-html-css',
+  'editorconfig.editorconfig',
+  'folke.vscode-monorepo-workspace',
+  'humao.rest-client',
+  'johnpapa.vscode-peacock',
+  'karyfoundation.nearley',
+  'kast789.vs-2019-theme',
+  'mariusalchimavicius.json-to-ts',
+  'marklel.vscode-brazil',
+  'mhutchie.git-graph',
+  'mikestead.dotenv',
+  'ms-python.isort',
+  'ms-toolsai.vscode-jupyter-slideshow',
+  'planbcoding.vscode-react-refactor',
+  'redhat.fabric8-analytics',
+  'redhat.vscode-commons',
+  'satokaz.vscode-markdown-header-coloring',
+  'wix.glean',
+  'dbaeumer.vscode-eslint',
+  'christian-kohler.npm-intellisense',
+  'jebbs.plantuml',
+  'hediet.vscode-drawio',
+  'ms-toolsai.jupyter-keymap',
+  'golang.go',
+  'ms-toolsai.jupyter-renderers',
+  'shd101wyy.markdown-preview-enhanced',
+  'ms-toolsai.vscode-jupyter-cell-tags',
+  'redhat.vscode-yaml',
+  'yzhang.markdown-all-in-one',
+  'vscjava.vscode-java-test',
+  'vscjava.vscode-maven',
+  'grapecity.gc-excelviewer',
+  'streetsidesoftware.code-spell-checker',
+  'meganrogge.template-string-converter',
+  'marp-team.marp-vscode',
+  'ms-azuretools.vscode-docker',
+  'redhat.vscode-xml',
+  'esbenp.prettier-vscode',
+  'vscjava.vscode-java-dependency',
+  'vscjava.vscode-java-pack',
+  'vscjava.vscode-java-debug',
+  'pkief.material-icon-theme',
+  'redhat.java',
+  'ms-vscode.remote-explorer',
+  'ms-vscode-remote.remote-containers',
+  'ms-toolsai.jupyter',
+  'ms-python.python',
+  'ms-vscode-remote.remote-ssh-edit',
+  'ms-vscode-remote.remote-ssh',
+  'ms-python.vscode-pylance',
+];
+
 export function vsCodeServer(userData: UserData, instanceRole: Role, scope: IConstruct, props: { user: string }) {
+  const code = `/home/${props.user}/openvscode-server-v${version}-linux-x64/bin/openvscode-server`;
   userData.addCommands(
     runAs(
       props.user,
@@ -28,7 +85,7 @@ export function vsCodeServer(userData: UserData, instanceRole: Role, scope: ICon
     `[Service]`,
     `Type=simple`,
     `User=${props.user}`,
-    `ExecStart=/home/${props.user}/openvscode-server-v${version}-linux-x64/bin/openvscode-server --without-connection-token`,
+    `ExecStart=${code} --without-connection-token`,
     `TimeoutStartSec=0`,
     `RemainAfterExit=yes`,
     ``,
@@ -43,6 +100,7 @@ export function vsCodeServer(userData: UserData, instanceRole: Role, scope: ICon
 
     runAs(props.user, `mkdir -p ~/${configDir}/extensions`),
     runAs(props.user, `touch ~/${configDir}/extensions/extensions.json`),
+    ...extensions.map((x) => runAs(props.user, `${code} --install-extension ${x}`)),
   );
 
   const settingsJson = new Asset(scope, 'VSCSettings', { path: path.join(__dirname, 'vscode-server/settings.json') });
@@ -51,16 +109,6 @@ export function vsCodeServer(userData: UserData, instanceRole: Role, scope: ICon
     bucket: settingsJson.bucket,
     bucketKey: settingsJson.s3ObjectKey,
     localFile: `/home/${props.user}/${configDir}/data/Machine/settings.json`,
-  });
-
-  const installExtensions = new Asset(scope, 'VSCExtensions', {
-    path: path.join(__dirname, 'vscode-server/install-extensions.sh'),
-  });
-  installExtensions.grantRead(instanceRole);
-  userData.addS3DownloadCommand({
-    bucket: installExtensions.bucket,
-    bucketKey: installExtensions.s3ObjectKey,
-    localFile: `/home/${props.user}/${configDir}/install-extensions.sh`,
   });
 
   userData.addCommands(chown(props.user, `/home/${props.user}/${configDir}/`));
