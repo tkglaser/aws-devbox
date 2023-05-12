@@ -88,6 +88,7 @@ export class DevboxStack extends Stack {
     props.volume.grantAttachVolumeByResourceTag(inst.grantPrincipal, [inst]);
 
     inst.node.addDependency(instanceRole);
+    inst.node.addDependency(props.volume);
 
     this.instanceRole = inst.role;
 

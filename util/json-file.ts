@@ -1,25 +1,15 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import { BaseFile } from './base-file';
 
-export class JsonFile<T = any> {
-  private _content: T;
-  private hasBeenRead = false;
-  private readonly fileName: string;
-
-  constructor(...paths: string[]) {
-    this.fileName = path.join(...paths);
+export class JsonFile<T = any> extends BaseFile<T> {
+  protected parse(value: string): T {
+    return JSON.parse(value);
   }
 
-  get content() {
-    if (!this.hasBeenRead) {
-      this._content = JSON.parse(fs.readFileSync(this.fileName).toString('utf8'));
-      this.hasBeenRead = true;
-    }
-    return this._content;
+  protected stringify(value: T): string {
+    return JSON.stringify(value, undefined, 2);
   }
 
-  set content(value: T) {
-    this._content = value;
-    fs.writeFileSync(this.fileName, JSON.stringify(value, undefined, 2));
+  protected emptyValue(): T {
+    return {} as T;
   }
 }

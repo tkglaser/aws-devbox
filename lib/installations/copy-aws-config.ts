@@ -4,6 +4,8 @@ import { Asset } from 'aws-cdk-lib/aws-s3-assets';
 import { IConstruct } from 'constructs';
 import * as path from 'path';
 
+import { chown } from './utils/ubuntu-commands';
+
 export function copyAwsConfig(
   userData: UserData,
   instanceRole: Role,
@@ -21,5 +23,5 @@ export function copyAwsConfig(
     bucketKey: asset.s3ObjectKey,
     localFile: `/home/${props.user}/.aws/config`,
   });
-  userData.addCommands(`sudo chown -R ${props.user}:${props.user} /home/${props.user}/.aws`);
+  userData.addCommands(chown(props.user, `/home/${props.user}/.aws`));
 }

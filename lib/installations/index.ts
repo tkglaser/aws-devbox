@@ -8,6 +8,7 @@ import { mountExternalVolume } from './mount-ebs-volume';
 import { Role } from 'aws-cdk-lib/aws-iam';
 import { IConstruct } from 'constructs';
 import { copyAwsConfig } from './copy-aws-config';
+import { vsCodeServer } from './vscode-server';
 
 export function install(userData: UserData, props: { scope: IConstruct; volume: Volume; instanceRole: Role }) {
   createUser(userData, config);
@@ -15,4 +16,5 @@ export function install(userData: UserData, props: { scope: IConstruct; volume: 
   mountExternalVolume(userData, props.volume, config);
   copyAwsConfig(userData, props.instanceRole, props.scope, config);
   nodeAndTools(userData, config);
+  vsCodeServer(userData, props.instanceRole, props.scope, config);
 }

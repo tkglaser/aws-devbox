@@ -80,12 +80,26 @@ function updateSshConfig() {
   const devboxConfig: string[] = [];
   if (config.networkingMode === NetworkingMode.AWS_SSM) {
     devboxConfig.push(
-      'Host devbox',
+      `Host devbox`,
       `  HostName ${env().instanceId}`,
       `  ProxyCommand sh -c "aws --profile ${config.account.profile} ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'"`,
+      ``,
+      `Host devbox-ports`,
+      `  HostName ${env().instanceId}`,
+      `  LocalForward 3000 localhost:3000`,
+      `  ProxyCommand sh -c "aws --profile ${config.account.profile} ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'"`,
+      ``,
     );
   } else {
-    devboxConfig.push('Host devbox', `  HostName ${env().instanceIp}`);
+    devboxConfig.push(
+      `Host devbox`,
+      `  HostName ${env().instanceIp}`,
+      ``,
+      `Host devbox-ports`,
+      `  HostName ${env().instanceIp}`,
+      `  LocalForward 3000 localhost:3000`,
+      ``,
+    );
   }
 
   const restOfConfig: string[] = [];
