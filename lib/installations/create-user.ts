@@ -1,9 +1,8 @@
-import { UserData } from 'aws-cdk-lib/aws-ec2';
-
 import { chown } from './utils/ubuntu-commands';
+import { UserDataBuilder } from './utils/user-data-builder';
 
-export function createUser(userData: UserData, props: { user: string; instance: { defaultUser?: string } }) {
-  userData.addCommands(
+export function createUser(userData: UserDataBuilder, props: { user: string; instance: { defaultUser?: string } }) {
+  userData.beforeAptInstall(
     `sudo adduser ${props.user} --disabled-password --gecos ""`,
     `sudo usermod -aG sudo ${props.user}`,
     `sudo echo "${props.user} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers`,

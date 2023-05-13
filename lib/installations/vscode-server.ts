@@ -1,10 +1,7 @@
-import { UserData } from 'aws-cdk-lib/aws-ec2';
-import { Role } from 'aws-cdk-lib/aws-iam';
-import { Asset } from 'aws-cdk-lib/aws-s3-assets';
-import { IConstruct } from 'constructs';
 import * as path from 'path';
 
 import { chown, runAs } from './utils/ubuntu-commands';
+import { UserDataBuilder } from './utils/user-data-builder';
 
 const version = '1.78.1';
 
@@ -57,18 +54,13 @@ const extensions = [
   'vscjava.vscode-java-debug',
   'pkief.material-icon-theme',
   'redhat.java',
-  'ms-vscode.remote-explorer',
-  'ms-vscode-remote.remote-containers',
   'ms-toolsai.jupyter',
   'ms-python.python',
-  'ms-vscode-remote.remote-ssh-edit',
-  'ms-vscode-remote.remote-ssh',
-  'ms-python.vscode-pylance',
 ];
 
-export function vsCodeServer(userData: UserData, instanceRole: Role, scope: IConstruct, props: { user: string }) {
+export function vsCodeServer(userData: UserDataBuilder, props: { user: string }) {
   const code = `/home/${props.user}/openvscode-server-v${version}-linux-x64/bin/openvscode-server`;
-  userData.addCommands(
+  userData.cmd(
     runAs(
       props.user,
       `wget https://github.com/gitpod-io/openvscode-server/releases/download/openvscode-server-v${version}/openvscode-server-v${version}-linux-x64.tar.gz -O code-server.tar.gz`,
@@ -103,13 +95,10 @@ export function vsCodeServer(userData: UserData, instanceRole: Role, scope: ICon
     ...extensions.map((x) => runAs(props.user, `${code} --install-extension ${x}`)),
   );
 
-  const settingsJson = new Asset(scope, 'VSCSettings', { path: path.join(__dirname, 'vscode-server/settings.json') });
-  settingsJson.grantRead(instanceRole);
-  userData.addS3DownloadCommand({
-    bucket: settingsJson.bucket,
-    bucketKey: settingsJson.s3ObjectKey,
-    localFile: `/home/${props.user}/${configDir}/data/Machine/settings.json`,
-  });
+  userData.s3Copy(
+    path.join(__dirname, 'vscode-server/settings.json'),
+    `/home/${props.user}/${configDir}/data/Machine/settings.json`,
+  );
 
-  userData.addCommands(chown(props.user, `/home/${props.user}/${configDir}/`));
+  userData.cmd(chown(props.user, `/home/${props.user}/${configDir}/`));
 }

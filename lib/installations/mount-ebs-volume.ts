@@ -1,9 +1,10 @@
-import { UserData, Volume } from 'aws-cdk-lib/aws-ec2';
+import { Volume } from 'aws-cdk-lib/aws-ec2';
 
 import { chown } from './utils/ubuntu-commands';
+import { UserDataBuilder } from './utils/user-data-builder';
 
 export function mountExternalVolume(
-  userData: UserData,
+  userData: UserDataBuilder,
   volume: Volume,
   props: {
     user: string;
@@ -14,7 +15,7 @@ export function mountExternalVolume(
   const path = props.instance.volumeMountTarget ?? `/home/${props.user}/projects`;
   const targetDevice = '/dev/sdf';
   const internalDevice = '/dev/nvme1n1'; // EBS optimised is mounted as NVMe
-  userData.addCommands(
+  userData.cmd(
     `sudo mkdir ${path}`,
     chown(props.user, path),
     `InstanceID=$(ls /var/lib/cloud/instances)`,

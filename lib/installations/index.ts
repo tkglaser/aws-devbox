@@ -9,12 +9,19 @@ import { Role } from 'aws-cdk-lib/aws-iam';
 import { IConstruct } from 'constructs';
 import { copyAwsConfig } from './copy-aws-config';
 import { vsCodeServer } from './vscode-server';
+import { docker } from './docker';
+import { UserDataBuilder } from './utils/user-data-builder';
 
-export function install(userData: UserData, props: { scope: IConstruct; volume: Volume; instanceRole: Role }) {
+export function createUserData(props: { scope: IConstruct; volume: Volume; instanceRole: Role }) {
+  const userData = new UserDataBuilder();
+
   createUser(userData, config);
   globalToolsAndSettings(userData, config);
   mountExternalVolume(userData, props.volume, config);
-  copyAwsConfig(userData, props.instanceRole, props.scope, config);
+  copyAwsConfig(userData, config);
   nodeAndTools(userData, config);
-  vsCodeServer(userData, props.instanceRole, props.scope, config);
+  vsCodeServer(userData, config);
+  docker(userData, config);
+
+  return userData.render(props.scope, props.instanceRole);
 }

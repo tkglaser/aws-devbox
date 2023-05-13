@@ -21,7 +21,7 @@ import { Construct } from 'constructs';
 import { config } from '../config/config';
 import { NetworkingMode } from '../models/config';
 import { SwitchOffLambda } from './constructs/switch-off/switch-off.lambda';
-import { install } from './installations';
+import { createUserData } from './installations';
 
 export interface DevboxStackProps extends StackProps {
   vpc: Vpc;
@@ -40,9 +40,7 @@ export class DevboxStack extends Stack {
       managedPolicies: [ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore')],
     });
 
-    const userData = UserData.forLinux();
-
-    install(userData, { scope: this, volume: props.volume, instanceRole });
+    const userData = createUserData({ scope: this, volume: props.volume, instanceRole });
 
     const machineImage = MachineImage.fromSsmParameter(config.instance.amiSsmParameter, {
       os: OperatingSystemType.LINUX,

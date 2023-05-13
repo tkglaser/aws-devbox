@@ -1,27 +1,14 @@
-import { UserData } from 'aws-cdk-lib/aws-ec2';
-import { Role } from 'aws-cdk-lib/aws-iam';
-import { Asset } from 'aws-cdk-lib/aws-s3-assets';
-import { IConstruct } from 'constructs';
 import * as path from 'path';
 
 import { chown } from './utils/ubuntu-commands';
+import { UserDataBuilder } from './utils/user-data-builder';
 
 export function copyAwsConfig(
-  userData: UserData,
-  instanceRole: Role,
-  scope: IConstruct,
+  userData: UserDataBuilder,
   props: {
     user: string;
   },
 ) {
-  const asset = new Asset(scope, 'AwsConfig', {
-    path: path.join(__dirname, '../../assets/aws.config'),
-  });
-  asset.grantRead(instanceRole);
-  userData.addS3DownloadCommand({
-    bucket: asset.bucket,
-    bucketKey: asset.s3ObjectKey,
-    localFile: `/home/${props.user}/.aws/config`,
-  });
-  userData.addCommands(chown(props.user, `/home/${props.user}/.aws`));
+  userData.s3Copy(path.join(__dirname, '../../assets/aws.config'), `/home/${props.user}/.aws/config`);
+  userData.cmd(chown(props.user, `/home/${props.user}/.aws`));
 }
