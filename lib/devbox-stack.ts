@@ -15,7 +15,7 @@ import {
 } from 'aws-cdk-lib/aws-ec2';
 import { Rule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
-import { IRole, ManagedPolicy, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import { IRole, ManagedPolicy, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 
 import { config } from '../config/config';
@@ -39,6 +39,18 @@ export class DevboxStack extends Stack {
       assumedBy: new ServicePrincipal('ec2.amazonaws.com'),
       managedPolicies: [ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore')],
     });
+
+    instanceRole.addToPolicy(
+      new PolicyStatement({
+        actions: [
+          'codeartifact:GetAuthorizationToken',
+          'codeartifact:GetRepositoryEndpoint',
+          'codeartifact:ReadFromRepository',
+          'sts:GetServiceBearerToken',
+        ],
+        resources: ['*'], // log in to external CA repos
+      }),
+    );
 
     const userData = createUserData({ scope: this, volume: props.volume, instanceRole });
 
