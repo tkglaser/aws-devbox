@@ -12,6 +12,8 @@ export const config: Config = {
   userName: 'John Doe',
   email: 'john@example.com',
   networkingMode: NetworkingMode.AWS_SSM,
+  timeZone: 'Europe/London',
+  locale: 'en_GB.UTF-8',
   account: {
     id: '123456789012',
     profile: 'my-dev-account',
@@ -22,7 +24,9 @@ export const config: Config = {
     // Latest Ubuntu Minimal Server
     amiSsmParameter: '/aws/service/canonical/ubuntu/server-minimal/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id',
   },
-  autoSwitchOff: Schedule.cron({ minute: '0', hour: '2' }),
+  autoSwitch: {
+    off: Schedule.cron({ minute: '0', hour: '2' }),
+  },
   sshKey: {
     name: 'my-key-name',
     file: '/path/to/my-key-name.pem',

@@ -102,7 +102,7 @@ export class DevboxStack extends Stack {
     if (config.autoSwitch) {
       new StartStopSchedule(this, 'StartStopSchedule', {
         instanceId: inst.instanceId,
-        timeZone: config.autoSwitch.timeZone,
+        timeZone: config.timeZone,
         start: config.autoSwitch.on,
         stop: config.autoSwitch.off,
       });

@@ -65,6 +65,22 @@ export interface Config {
   email: string;
 
   /**
+   * The timezone to use for the machine.
+   *
+   * @see https://www.iana.org/time-zones
+   * 
+   * @example Europe/London
+   */
+  timeZone: string;
+
+  /**
+   * The OS locale.
+   *
+   * @example en_GB.UTF-8
+   */
+  locale: string;
+
+  /**
    * The networking configuration used to connect to your devbox.
    * Please look at the options of `NetworkingMode` carefully to decide.
    * Changing this later may require you to tear down the devbox and the VPC.
@@ -133,13 +149,6 @@ export interface Config {
      * @default never
      */
     off?: Schedule;
-
-    /**
-     * The timezone to use for the schedules.
-     *
-     * @see https://www.iana.org/time-zones
-     */
-    timeZone: string;
   };
 
   /**
