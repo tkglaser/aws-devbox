@@ -35,7 +35,9 @@ export class DevboxDeploymentStack extends Stack {
                 'cloudformation:TagResource',
                 'cloudformation:UntagResource',
               ],
-              resources: [this.formatArn({ service: 'cloudformation', resource: 'stack', resourceName: '*' })],
+              resources: [
+                this.formatArn({ service: 'cloudformation', region: '*', resource: 'stack', resourceName: '*' }),
+              ],
             }),
             new PolicyStatement({
               actions: ['cloudformation:ValidateTemplate'],
@@ -84,7 +86,7 @@ export class DevboxDeploymentStack extends Stack {
                 'ssm:LabelParameterVersion',
                 'ssm:UnlabelParameterVersion',
               ],
-              resources: [this.formatArn({ service: 'ssm', resource: 'parameter', resourceName: '*' })],
+              resources: [this.formatArn({ service: 'ssm', region: '*', resource: 'parameter', resourceName: '*' })],
             }),
             new PolicyStatement({
               actions: ['ecr:CreateRepository'],
@@ -97,8 +99,11 @@ export class DevboxDeploymentStack extends Stack {
                 'ecr:SetRepositoryPolicy',
                 'ecr:DeleteRepositoryPolicy',
                 'ecr:DescribeRepositories',
+                'ecr:PutLifecyclePolicy',
               ],
-              resources: [this.formatArn({ service: 'ecr', resource: 'repository', resourceName: 'cdk-*' })],
+              resources: [
+                this.formatArn({ service: 'ecr', region: '*', resource: 'repository', resourceName: 'cdk-*' }),
+              ],
             }),
             new PolicyStatement({
               actions: [
@@ -114,6 +119,7 @@ export class DevboxDeploymentStack extends Stack {
                 's3:PutEncryptionConfiguration',
                 's3:GetBucketPublicAccessBlock',
                 's3:PutBucketPublicAccessBlock',
+                's3:PutLifecycleConfiguration',
               ],
               resources: [this.formatArn({ service: 's3', region: '', account: '', resource: 'cdk-*' })],
             }),
