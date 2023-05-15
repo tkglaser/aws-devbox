@@ -9,18 +9,15 @@ import {
   Peer,
   Port,
   SecurityGroup,
-  UserData,
   Volume,
   Vpc,
 } from 'aws-cdk-lib/aws-ec2';
-import { Rule } from 'aws-cdk-lib/aws-events';
-import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { IRole, ManagedPolicy, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 
 import { config } from '../config/config';
 import { NetworkingMode } from '../models/config';
-import { SwitchOffLambda } from './constructs/switch-off/switch-off.lambda';
+import { StartStopSchedule } from './constructs/start-stop-schedule';
 import { createUserData } from './installations';
 
 export interface DevboxStackProps extends StackProps {
@@ -102,10 +99,13 @@ export class DevboxStack extends Stack {
 
     this.instanceRole = inst.role;
 
-    if (config.autoSwitchOff) {
-      const switchOffLambda = new SwitchOffLambda(this, 'SwitchOff', { instanceId: inst.instanceId });
-      const cron = new Rule(this, 'SwitchOffRule', { schedule: config.autoSwitchOff });
-      cron.addTarget(new LambdaFunction(switchOffLambda));
+    if (config.autoSwitch) {
+      new StartStopSchedule(this, 'StartStopSchedule', {
+        instanceId: inst.instanceId,
+        timeZone: config.autoSwitch.timeZone,
+        start: config.autoSwitch.on,
+        stop: config.autoSwitch.off,
+      });
     }
 
     new CfnOutput(this, 'ID', {

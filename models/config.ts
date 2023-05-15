@@ -113,19 +113,39 @@ export interface Config {
   };
 
   /**
-   * Automatically stop the instance at a certain time (or times).
-   *
-   * @example Schedule.cron({ minute: '0', hour: '2' }) // stops the instance at 2am each night
-   *
-   * @default never
+   * Automatically switch the instance on or off
    */
-  autoSwitchOff?: Schedule;
+  autoSwitch?: {
+    /**
+     * Automatically stop the instance at a certain time (or times).
+     *
+     * @example Schedule.cron({ minute: '0', hour: '7', weekDay: 'MON-FRI' })
+     *
+     * @default never
+     */
+    on?: Schedule;
+
+    /**
+     * Automatically stop the instance at a certain time (or times).
+     *
+     * @example Schedule.cron({ minute: '0', hour: '18' })
+     *
+     * @default never
+     */
+    off?: Schedule;
+
+    /**
+     * The timezone to use for the schedules.
+     *
+     * @see https://www.iana.org/time-zones
+     */
+    timeZone: string;
+  };
 
   /**
    * The SSH Key to use to connect to the instance
    */
   sshKey: {
-
     /**
      * The name of the key as displayed in the AWS Console
      */
@@ -144,7 +164,7 @@ export interface Config {
 
   /**
    * List of AWS accounts that the devbox will have access to.
-   * 
+   *
    * The `profile` for each account has to exist on the local computer. It will
    * be used to deploy a role which the devbox can assume cross-account. The profile
    * will then also be available under the same name on the devbox instance.
