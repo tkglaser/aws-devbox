@@ -1,7 +1,7 @@
 import { Stack } from 'aws-cdk-lib';
 import { Schedule } from 'aws-cdk-lib/aws-events';
 import { PolicyDocument, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { CfnSchedule, CfnScheduleGroup } from 'aws-cdk-lib/aws-scheduler';
+import { CfnSchedule, CfnScheduleGroup, CfnScheduleProps } from 'aws-cdk-lib/aws-scheduler';
 import { Construct, IConstruct } from 'constructs';
 
 export interface StartStopScheduleProps {
@@ -35,20 +35,23 @@ export class StartStopSchedule extends Construct {
       name: 'instance-manager',
     });
 
-    const commonScheduleProps = {
+    const commonScheduleProps: Pick<
+      CfnScheduleProps,
+      'groupName' | 'flexibleTimeWindow' | 'scheduleExpressionTimezone'
+    > = {
       groupName: group.name,
       flexibleTimeWindow: {
-        mode: 'OFF',
+        mode: 'FLEXIBLE',
+        maximumWindowInMinutes: 30,
       },
       scheduleExpressionTimezone: props.timeZone,
     };
 
-    const commonTargetProps = {
+    const commonTargetProps: Pick<CfnSchedule.TargetProperty, 'roleArn' | 'input' | 'retryPolicy'> = {
       roleArn: schedulerRole.roleArn,
       input: JSON.stringify({ InstanceIds: [props.instanceId] }),
       retryPolicy: {
-        maximumEventAgeInSeconds: 60,
-        maximumRetryAttempts: 3,
+        maximumEventAgeInSeconds: 60 * 10,
       },
     };
 
