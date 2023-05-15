@@ -1,4 +1,3 @@
-import { UserData } from 'aws-cdk-lib/aws-ec2';
 import { runAs } from './utils/ubuntu-commands';
 import { UserDataBuilder } from './utils/user-data-builder';
 
@@ -8,7 +7,7 @@ export function globalToolsAndSettings(
 ) {
   userData
     .beforeAptInstall('sudo apt-get update -y', 'sudo apt-get install -y --no-install-recommends apt-utils')
-    .aptInstall('locales', 'git', 'awscli', 'unison', 'nano', 'mc', 'build-essential', 'python3-pip')
+    .aptInstall('locales', 'git', 'unison', 'nano', 'mc', 'build-essential', 'python3-pip')
     .cmd(
       'sudo pip3 install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz',
       'sudo mkdir -p /opt/aws/bin',

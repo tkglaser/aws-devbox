@@ -11,12 +11,14 @@ import { copyAwsConfig } from './copy-aws-config';
 import { vsCodeServer } from './vscode-server';
 import { docker } from './docker';
 import { UserDataBuilder } from './utils/user-data-builder';
+import { awsCli } from './aws-cli';
 
 export function createUserData(props: { scope: IConstruct; volume: Volume; instanceRole: Role }) {
   const userData = new UserDataBuilder();
 
   createUser(userData, config);
   globalToolsAndSettings(userData, config);
+  awsCli(userData);
   mountExternalVolume(userData, props.volume, config);
   copyAwsConfig(userData, config);
   nodeAndTools(userData, config);
