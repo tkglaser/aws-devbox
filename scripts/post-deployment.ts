@@ -21,8 +21,8 @@ async function main() {
 main();
 
 function saveInstanceIdToEnv() {
-  const cdkOut = new JsonFile<{ DevboxStack: { ID: string } }>(__dirname, '../cdk.out.json');
-  saveValueToEnv('DEVBOX_INSTANCE_ID', cdkOut.content.DevboxStack.ID);
+  const cdkOut = new JsonFile<{ DevboxStack: { InstanceId: string } }>(__dirname, '../cdk.out.json');
+  saveValueToEnv('DEVBOX_INSTANCE_ID', cdkOut.content.DevboxStack.InstanceId);
 }
 
 async function startInstance() {

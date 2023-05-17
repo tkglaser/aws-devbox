@@ -4,6 +4,7 @@ import { config } from '../config/config';
 import { JsonFile } from '../util/json-file';
 import { TextFile } from '../util/text-file';
 import { NetworkingMode } from '../models/config';
+import { deploymentRoleName } from '../util/names';
 
 function main() {
   renderAwsConfig();
@@ -38,7 +39,9 @@ function renderAwsConfig() {
   for (const deploymentAccount of config.deploymentAccounts) {
     awsConfig.push(
       `[profile ${deploymentAccount.profile}]`,
-      `role_arn = arn:aws:iam::${deploymentAccount.id}:role/devbox-deployment-role`,
+      `output = json`,
+      `region = ${deploymentAccount.region}`,
+      `role_arn = arn:aws:iam::${deploymentAccount.id}:role/${deploymentRoleName(config.user, config.account.id)}`,
       `credential_source = Ec2InstanceMetadata`,
       ``,
     );

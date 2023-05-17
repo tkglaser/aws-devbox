@@ -108,7 +108,7 @@ export class DevboxStack extends Stack {
       });
     }
 
-    new CfnOutput(this, 'ID', {
+    new CfnOutput(this, 'InstanceId', {
       value: inst.instanceId,
     });
   }

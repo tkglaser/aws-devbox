@@ -2,6 +2,9 @@ import { CfnOutput, Stack, StackProps } from 'aws-cdk-lib';
 import { AccountPrincipal, IRole, PolicyDocument, PolicyStatement, Role } from 'aws-cdk-lib/aws-iam';
 import { IConstruct } from 'constructs';
 
+import { config } from '../config/config';
+import { deploymentRoleName } from '../util/names';
+
 export interface DevboxDeploymentStackProps extends StackProps {
   instanceRole: IRole;
 }
@@ -11,7 +14,7 @@ export class DevboxDeploymentStack extends Stack {
     super(scope, id, props);
 
     const deploymentRole = new Role(this, 'DeploymentRole', {
-      roleName: 'devbox-deployment-role',
+      roleName: deploymentRoleName(config.user, config.account.id),
       assumedBy: new AccountPrincipal(Stack.of(props.instanceRole).account),
       inlinePolicies: {
         deploy: new PolicyDocument({
@@ -44,21 +47,7 @@ export class DevboxDeploymentStack extends Stack {
               resources: ['*'],
             }),
             new PolicyStatement({
-              actions: [
-                'iam:GetRole',
-                'iam:PassRole',
-                'iam:CreateRole',
-                'iam:DeleteRole',
-                'iam:UpdateRole',
-                'iam:UpdateRoleDescription',
-                'iam:TagRole',
-                'iam:UntagRole',
-                'iam:GetRolePolicy',
-                'iam:PutRolePolicy',
-                'iam:AttachRolePolicy',
-                'iam:DetachRolePolicy',
-                'iam:DeleteRolePolicy',
-              ],
+              actions: ['iam:*'],
               resources: [this.formatArn({ service: 'iam', region: '', resource: 'role', resourceName: 'cdk-*' })],
             }),
             new PolicyStatement({
@@ -93,34 +82,13 @@ export class DevboxDeploymentStack extends Stack {
               resources: ['*'],
             }),
             new PolicyStatement({
-              actions: [
-                'ecr:DeleteRepository',
-                'ecr:GetRepositoryPolicy',
-                'ecr:SetRepositoryPolicy',
-                'ecr:DeleteRepositoryPolicy',
-                'ecr:DescribeRepositories',
-                'ecr:PutLifecyclePolicy',
-              ],
+              actions: ['ecr:*'],
               resources: [
                 this.formatArn({ service: 'ecr', region: '*', resource: 'repository', resourceName: 'cdk-*' }),
               ],
             }),
             new PolicyStatement({
-              actions: [
-                's3:CreateBucket',
-                's3:DeleteBucket',
-                's3:GetBucketPolicy',
-                's3:PutBucketPolicy',
-                's3:DeleteBucketPolicy',
-                's3:GetBucketPolicyStatus',
-                's3:GetBucketVersioning',
-                's3:PutBucketVersioning',
-                's3:GetEncryptionConfiguration',
-                's3:PutEncryptionConfiguration',
-                's3:GetBucketPublicAccessBlock',
-                's3:PutBucketPublicAccessBlock',
-                's3:PutLifecycleConfiguration',
-              ],
+              actions: ['s3:*'],
               resources: [this.formatArn({ service: 's3', region: '', account: '', resource: 'cdk-*' })],
             }),
           ],
