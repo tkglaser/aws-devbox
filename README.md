@@ -90,8 +90,8 @@ The devbox will be able to access other AWS accounts if you have configured acco
 ```ts
  deploymentAccounts: [
     {
-      id: '210987654321',
-      profile: 'my-other-account',
+      id: '222222222222',
+      profile: 'my-test-account',
       region: 'eu-west-2',
     },
   ],
@@ -99,16 +99,16 @@ The devbox will be able to access other AWS accounts if you have configured acco
 
 On the devbox, the `~/.aws/config` file will contain this:
 ```ini
-[profile my-other-account]
+[profile my-test-account]
 output = json
 region = eu-west-2
-role_arn = arn:aws:iam::210987654321:role/devbox-deployment-role
+role_arn = arn:aws:iam::222222222222:role/deploy-from-111111111111-useronbox
 credential_source = Ec2InstanceMetadata
 ```
 
 This means that aws cli commands like the following will work on the devbox:
 ```sh
-aws --profile my-other-account s3 ls
+aws --profile my-test-account s3 ls
 ```
 
 Note that the role in the deployment account is called `deploy-from-111111111111-useronbox`. Which permissions the role has can be changed in `lib/devbox-deployment-stack.ts`.
