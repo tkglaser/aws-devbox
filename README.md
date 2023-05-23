@@ -35,9 +35,11 @@ export const config: Config = {
   user: 'useronbox',
   userName: 'John Doe',
   email: 'john@example.com',
+  timeZone: 'Europe/London',
+  locale: 'en_GB.UTF-8',
   networkingMode: NetworkingMode.AWS_SSM,
   account: {
-    id: '123456789012',
+    id: '111111111111',
     profile: 'my-dev-account',
     region: 'my-region',
   },
@@ -46,16 +48,26 @@ export const config: Config = {
     // Latest Ubuntu Minimal Server
     amiSsmParameter: '/aws/service/canonical/ubuntu/server-minimal/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id',
   },
-  autoSwitchOff: Schedule.cron({ minute: '0', hour: '2' }),
+  autoSwitch: { // optionally start and stop the instance at certain times
+    on: Schedule.cron({ hour: '8', minute: '0' }), // switch on at 8am
+    off: Schedule.cron({ hour: '18', minute: '0' }), // switch off at 6pm
+  },
   sshKey: {
-    name: 'my-key-name',
-    file: '/path/to/my-key-name.pem',
+    name: 'my-key-name', // name in the AWS Console
+    file: '/path/to/my-key-name.pem', // file on local disk
   },
   deploymentAccounts: [
-    {
-      id: '210987654321',
+    { // The devbox will be able to run CDK deployments on this account
+      id: '222222222222', 
       profile: 'my-test-account',
       region: 'my-region',
+    },
+    { // The devbox will be able to run CDK deployments on this account and CDK multi-account deployments
+      // if the other account is 222222222222
+      id: '333333333333', 
+      profile: 'my-other-test-account',
+      region: 'my-region',
+      deployToAccounts: ['222222222222']
     },
   ],
 };
@@ -86,8 +98,10 @@ The devbox will be able to access other AWS accounts if you have configured acco
 ```
 
 On the devbox, the `~/.aws/config` file will contain this:
-```
+```ini
 [profile my-other-account]
+output = json
+region = eu-west-2
 role_arn = arn:aws:iam::210987654321:role/devbox-deployment-role
 credential_source = Ec2InstanceMetadata
 ```

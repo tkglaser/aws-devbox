@@ -23,7 +23,12 @@ interface Account {
   region: string;
 
   /**
-   * The account transitively deploys to another account via CDK.
+   * Transitive deployment.
+   * 
+   * This account needs to transitively deploy to other account via CDK. List all other
+   * accounts here that this account needs access to.
+   * 
+   * @example ["111111111111", "222222222222"]
    */
   deployToAccounts?: string[];
 }
