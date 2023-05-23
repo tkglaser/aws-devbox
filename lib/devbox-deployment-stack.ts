@@ -7,6 +7,7 @@ import { deploymentRoleName } from '../util/names';
 
 export interface DevboxDeploymentStackProps extends StackProps {
   instanceRole: IRole;
+  deployToAccounts?: string[];
 }
 
 export class DevboxDeploymentStack extends Stack {
@@ -52,7 +53,18 @@ export class DevboxDeploymentStack extends Stack {
             }),
             new PolicyStatement({
               actions: ['sts:AssumeRole'],
-              resources: [this.formatArn({ service: 'iam', region: '', resource: 'role', resourceName: 'cdk-*' })],
+              resources: [
+                ...(props.deployToAccounts ?? []).map((crossDeployAccount) =>
+                  this.formatArn({
+                    account: crossDeployAccount,
+                    service: 'iam',
+                    region: '',
+                    resource: 'role',
+                    resourceName: 'cdk-*',
+                  }),
+                ),
+                this.formatArn({ service: 'iam', region: '', resource: 'role', resourceName: 'cdk-*' }),
+              ],
             }),
             new PolicyStatement({
               actions: [

@@ -21,6 +21,11 @@ interface Account {
    * For deployment accounts, this determines the region of the CloudFormation stacks.
    */
   region: string;
+
+  /**
+   * The account transitively deploys to another account via CDK.
+   */
+  deployToAccounts?: string[];
 }
 
 export const enum NetworkingMode {
@@ -68,7 +73,7 @@ export interface Config {
    * The timezone to use for the machine.
    *
    * @see https://www.iana.org/time-zones
-   * 
+   *
    * @example Europe/London
    */
   timeZone: string;
