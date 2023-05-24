@@ -1,5 +1,6 @@
 import { config } from '../config/config';
 import { runCommand } from '../util/run-command';
+import type { Account } from '../models/config';
 
 async function bootstrap() {
   const processes = [];
@@ -19,25 +20,31 @@ async function bootstrap() {
   );
 
   for (const targetAccount of config.deploymentAccounts) {
-    processes.push(
-      runCommand({
-        command: 'cdk',
-        args: [
-          'bootstrap',
-          '--profile',
-          targetAccount.profile,
-          ...executionPolicies('IAMFullAccess', 'AmazonSSMReadOnlyAccess'),
-          '--output',
-          `cdk.out.bootstrap/${targetAccount.id}`,
-          '--trust',
-          config.account.id,
-          `aws://${targetAccount.id}/${targetAccount.region}`,
-        ],
-      }),
-    );
+    if (accountsOrRegionsAreDifferent(targetAccount, config.account)) {
+      processes.push(
+        runCommand({
+          command: 'cdk',
+          args: [
+            'bootstrap',
+            '--profile',
+            targetAccount.profile,
+            ...executionPolicies('IAMFullAccess', 'AmazonSSMReadOnlyAccess'),
+            '--output',
+            `cdk.out.bootstrap/${targetAccount.id}`,
+            '--trust',
+            config.account.id,
+            `aws://${targetAccount.id}/${targetAccount.region}`,
+          ],
+        }),
+      );
+    }
   }
 
   await Promise.all(processes);
+}
+
+function accountsOrRegionsAreDifferent(a: Account, b: Account) {
+  return a.id !== b.id || a.region !== b.region;
 }
 
 const executionPolicies = (...policies: string[]) =>

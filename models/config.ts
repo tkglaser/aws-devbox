@@ -1,7 +1,7 @@
 import { InstanceType } from 'aws-cdk-lib/aws-ec2';
 import { Schedule } from 'aws-cdk-lib/aws-events';
 
-interface Account {
+export interface Account {
   /**
    * The name of the AWS CLI profile to use to access this account
    */
