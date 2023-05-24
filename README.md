@@ -112,3 +112,44 @@ aws --profile my-test-account s3 ls
 ```
 
 Note that the role in the deployment account is called `deploy-from-111111111111-useronbox`. Which permissions the role has can be changed in `lib/devbox-deployment-stack.ts`.
+
+## Connecting to the instance
+The `npm start` will automatically configure your SSH configuration in `~/.ssh/config`.
+
+You can connect to the instance via:
+* `ssh devbox`
+* VS Code SSH plugin, connect to host `devbox`
+
+### Using the VS Code server
+
+The instance has a VS Code server installed that you can use via the browser. You can connect to the VS Code server via:
+1. Run `ssh devbox-ports` in a console and leave it running. This will connect port `3000` from the instance back to your local machine.
+2. Open a browser and go to `http://localhost:3000`. You should see a VS Code environment.
+
+To open a project on the devbox, Select **File** > **Open Folder** and navigate to a folder on the devbox.
+
+## Synching data
+We recommend using Unison to sync data between machines. Unison is installed on the box automatically. First, create a profile
+in `~/.unison/myprofile.prf`. Here is an example:
+
+```ini
+# Unison preferences
+ignore = Name node_modules
+ignore = Name temp
+ignore = Name .test
+ignore = Name cdk.out/*
+ignore = Name build/*
+
+root = /my/local/folder
+root = ssh://useronbox@devbox//home/useronbox/my/remote/folder
+
+# Optional, sync selected subfolders only
+path = projects
+path = documents
+sshargs = -C
+```
+
+Then, run Unison in a terminal, for example like this:
+```bash
+> unison myprofile -batch -repeat 10
+```
