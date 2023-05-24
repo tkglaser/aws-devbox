@@ -21,6 +21,6 @@ for (const deploymentAccount of config.deploymentAccounts) {
   new DevboxDeploymentStack(app, `DevboxDeploymentStack${deploymentAccount.id}`, {
     instanceRole,
     deployToAccounts: deploymentAccount.deployToAccounts,
-    env: { account: deploymentAccount.id },
+    env: { account: deploymentAccount.id, region: deploymentAccount.region },
   });
 }
