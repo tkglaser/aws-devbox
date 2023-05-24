@@ -15,3 +15,5 @@ cdk.out.json
 
 config/config.ts
 assets/*
+
+!**/.gitkeep
