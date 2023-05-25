@@ -1,4 +1,4 @@
-import { InstanceType } from 'aws-cdk-lib/aws-ec2';
+import { InstanceType, VolumeProps } from 'aws-cdk-lib/aws-ec2';
 import { Schedule } from 'aws-cdk-lib/aws-events';
 
 export interface Account {
@@ -24,10 +24,10 @@ export interface Account {
 
   /**
    * Transitive deployment.
-   * 
+   *
    * This account needs to transitively deploy to other account via CDK. List all other
    * accounts here that this account needs access to.
-   * 
+   *
    * @example ["111111111111", "222222222222"]
    */
   deployToAccounts?: string[];
@@ -55,6 +55,13 @@ export const enum NetworkingMode {
    * group configuration.
    */
   PUBLIC_IP,
+}
+
+interface EBSSnapshotSettings {
+  /**
+   * Number of snapshots that are retained.
+   */
+  retained?: number;
 }
 
 export interface Config {
@@ -136,6 +143,29 @@ export interface Config {
      * @default ubuntu
      */
     defaultUser?: string;
+  };
+
+  /**
+   * Settings related to the persistent development volume.
+   */
+  volume?: {
+    /**
+     * Properties of the volume, for example volume size.
+     *
+     * @default 100GB GP3
+     */
+    properties?: Omit<VolumeProps, 'encrypted'>;
+
+    /**
+     * EBS Snapshot settings
+     * 
+     * @default No backup
+     */
+    backup?: {
+      daily?: EBSSnapshotSettings;
+      weekly?: EBSSnapshotSettings;
+      monthly?: EBSSnapshotSettings;
+    };
   };
 
   /**
