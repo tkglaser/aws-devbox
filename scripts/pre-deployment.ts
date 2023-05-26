@@ -6,30 +6,55 @@ import { TextFile } from '../util/text-file';
 import { NetworkingMode } from '../models/config';
 import { deploymentRoleName } from '../util/names';
 
-function main() {
+async function main() {
   renderAwsConfig();
   if (config.networkingMode === NetworkingMode.PUBLIC_IP) {
-    getIpAndSaveToContext();
+    await getIpAndSaveToContext();
   }
 }
 
 main();
 
-function getIpAndSaveToContext() {
+async function getIpAndSaveToContext() {
+  const currentPublicIp = await getIpOrExit();
+  const cdkContext = new JsonFile<{ currentPublicIp: string }>(__dirname, '../cdk.context.json');
+  cdkContext.content = { ...cdkContext.content, currentPublicIp };
+}
+
+async function getIpOrExit() {
   console.log('Checking public IP...');
-  superagent.get('api.ipify.org/?format=json').end((err, res) => {
-    if (err) {
-      console.error(err);
-      process.exit(1);
-    }
 
-    console.log(`Public IP is ${res.body.ip}`);
+  console.log('Trying ipify...');
+  try {
+    const res = await getUrl<{ ip: string }>('api.ipify.org/?format=json');
+    return res.ip;
+  } catch {}
 
-    const cdkContext = new JsonFile<{ currentPublicIp: string }>(__dirname, '../cdk.context.json');
-    cdkContext.content = {
-      ...cdkContext.content,
-      currentPublicIp: res.body.ip,
-    };
+  console.log('Trying bigdatacloud...');
+  try {
+    const res = await getUrl<{ ipString: string }>('https://api.bigdatacloud.net/data/client-ip');
+    return res.ipString;
+  } catch {}
+
+  console.error('Unable to get IP');
+  process.exit(1);
+}
+
+function getUrl<T>(url: string) {
+  // We're not waiting longer than 2 seconds!
+  return new Promise<T>((resolve, reject) => {
+    const handle = setTimeout(() => {
+      reject('timed out');
+    }, 2000);
+
+    superagent.get(url).end((err, res) => {
+      clearTimeout(handle);
+      if (err) {
+        reject(err);
+      } else {
+        resolve(res.body);
+      }
+    });
   });
 }
 
