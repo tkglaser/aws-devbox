@@ -78,6 +78,7 @@ function updateSshConfig() {
   const sshConfig = new TextFile(os.homedir(), '.ssh/config');
 
   const devboxConfig: string[] = [];
+  const remotePorts = [config.ports?.vsCodeServer ?? 3000, ...(config.ports?.remoteToLocal ?? [])];
   if (config.networkingMode === NetworkingMode.AWS_SSM) {
     devboxConfig.push(
       `Host devbox`,
@@ -86,7 +87,7 @@ function updateSshConfig() {
       ``,
       `Host devbox-ports`,
       `  HostName ${env().instanceId}`,
-      `  LocalForward 3000 localhost:3000`,
+      ...remotePorts.map((port) => `  LocalForward ${port} localhost:${port}`),
       `  ProxyCommand sh -c "aws --profile ${config.account.profile} ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'"`,
       ``,
     );
@@ -97,7 +98,7 @@ function updateSshConfig() {
       ``,
       `Host devbox-ports`,
       `  HostName ${env().instanceIp}`,
-      `  LocalForward 3000 localhost:3000`,
+      ...remotePorts.map((port) => `  LocalForward ${port} localhost:${port}`),
       ``,
     );
   }

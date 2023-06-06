@@ -158,7 +158,7 @@ export interface Config {
 
     /**
      * EBS Snapshot settings
-     * 
+     *
      * @default No backup
      */
     backup?: {
@@ -210,6 +210,20 @@ export interface Config {
    * The AWS account where the devbox will reside.
    */
   account: Account;
+
+  ports?: {
+    /**
+     * The port for running VS Code Server.
+     *
+     * @default 3000
+     */
+    vsCodeServer?: number;
+
+    /**
+     * Ports to forward from the remote machine to the local machine
+     */
+    remoteToLocal?: number[];
+  };
 
   /**
    * List of AWS accounts that the devbox will have access to.

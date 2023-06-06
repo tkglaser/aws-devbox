@@ -3,7 +3,7 @@ import * as path from 'path';
 import { chown, runAs } from './utils/ubuntu-commands';
 import { UserDataBuilder } from './utils/user-data-builder';
 
-const version = '1.78.1';
+const version = '1.78.2';
 
 const configDir = '.openvscode-server';
 
@@ -58,7 +58,7 @@ const extensions = [
   'ms-python.python',
 ];
 
-export function vsCodeServer(userData: UserDataBuilder, props: { user: string }) {
+export function vsCodeServer(userData: UserDataBuilder, props: { user: string; ports?: { vsCodeServer?: number } }) {
   const code = `/home/${props.user}/openvscode-server-v${version}-linux-x64/bin/openvscode-server`;
   userData.cmd(
     runAs(
@@ -77,7 +77,7 @@ export function vsCodeServer(userData: UserDataBuilder, props: { user: string })
     `[Service]`,
     `Type=simple`,
     `User=${props.user}`,
-    `ExecStart=${code} --without-connection-token`,
+    `ExecStart=${code} --without-connection-token --port ${props.ports?.vsCodeServer ?? 3000}`,
     `TimeoutStartSec=0`,
     `RemainAfterExit=yes`,
     ``,
