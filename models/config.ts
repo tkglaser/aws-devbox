@@ -1,7 +1,8 @@
 import { InstanceType, VolumeProps } from 'aws-cdk-lib/aws-ec2';
 import { Schedule } from 'aws-cdk-lib/aws-events';
+import { PolicyDocument } from 'aws-cdk-lib/aws-iam';
 
-export interface Account {
+export interface BaseAccount {
   /**
    * The name of the AWS CLI profile to use to access this account
    */
@@ -23,14 +24,18 @@ export interface Account {
   region: string;
 
   /**
-   * Transitive deployment.
-   *
-   * This account needs to transitively deploy to other account via CDK. List all other
-   * accounts here that this account needs access to.
-   *
-   * @example ["111111111111", "222222222222"]
+   * Managed policies to apply to the CDK Toolkit Stack
    */
-  deployToAccounts?: string[];
+  bootstrapPolicies?: string[];
+}
+
+export interface Account extends BaseAccount {
+  /**
+   * Inline policies to create in the deployment accounts
+   */
+  policies?: {
+    [name: string]: PolicyDocument;
+  };
 }
 
 export const enum NetworkingMode {
@@ -209,7 +214,7 @@ export interface Config {
   /**
    * The AWS account where the devbox will reside.
    */
-  account: Account;
+  account: BaseAccount;
 
   ports?: {
     /**

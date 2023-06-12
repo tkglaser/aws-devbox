@@ -42,6 +42,7 @@ export const config: Config = {
     id: '111111111111',
     profile: 'my-dev-account',
     region: 'my-region',
+    bootstrapPolicies: ['AdministratorAccess'], // Choose a more restrictive policy if possible
   },
   instance: {
     type: InstanceType.of(InstanceClass.T3, InstanceSize.XLARGE2),
@@ -57,17 +58,21 @@ export const config: Config = {
     file: '/path/to/my-key-name.pem', // file on local disk
   },
   deploymentAccounts: [
-    { // The devbox will be able to run CDK deployments on this account
+    { // The devbox will be able to access this account
       id: '222222222222', 
       profile: 'my-test-account',
       region: 'my-region',
-    },
-    { // The devbox will be able to run CDK deployments on this account and CDK multi-account deployments
-      // if the other account is 222222222222
-      id: '333333333333', 
-      profile: 'my-other-test-account',
-      region: 'my-region',
-      deployToAccounts: ['222222222222']
+      bootstrapPolicies: ['IAMFullAccess', 'AmazonSSMReadOnlyAccess'] // Policies used for the CDK Toolkit Stack
+      policies: { // The permissions that the devbox will have in the account
+        s3Access: new PolicyDocument({
+          statements: [
+            new PolicyStatement({
+              actions: ['s3:*'],
+              resources: ['*'],
+            }),
+          ],
+        }),
+      }
     },
   ],
 };

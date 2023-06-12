@@ -20,7 +20,7 @@ const { instanceRole } = new DevboxStack(app, 'DevboxStack', { env, vpc, vpcSubn
 for (const deploymentAccount of config.deploymentAccounts) {
   new DevboxDeploymentStack(app, `DevboxDeploymentStack${deploymentAccount.id}`, {
     instanceRole,
-    deployToAccounts: deploymentAccount.deployToAccounts,
+    deploymentAccountPolicies: deploymentAccount.policies,
     env: { account: deploymentAccount.id, region: deploymentAccount.region },
   });
 }

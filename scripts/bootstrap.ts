@@ -11,7 +11,7 @@ async function bootstrap() {
         'bootstrap',
         '--profile',
         config.account.profile,
-        ...executionPolicies('AdministratorAccess'),
+        ...executionPolicies(config.account.bootstrapPolicies),
         '--output',
         `cdk.out.bootstrap/${config.account.id}`,
         `aws://${config.account.id}/${config.account.region}`,
@@ -28,7 +28,7 @@ async function bootstrap() {
             'bootstrap',
             '--profile',
             targetAccount.profile,
-            ...executionPolicies('IAMFullAccess', 'AmazonSSMReadOnlyAccess'),
+            ...executionPolicies(targetAccount.bootstrapPolicies),
             '--output',
             `cdk.out.bootstrap/${targetAccount.id}`,
             '--trust',
@@ -47,7 +47,7 @@ function accountsOrRegionsAreDifferent(a: Account, b: Account) {
   return a.id !== b.id || a.region !== b.region;
 }
 
-const executionPolicies = (...policies: string[]) =>
-  policies.map((policy) => ['--cloudformation-execution-policies', `arn:aws:iam::aws:policy/${policy}`]).flat();
+const executionPolicies = (policies?: string[]) =>
+  (policies ?? []).map((policy) => ['--cloudformation-execution-policies', `arn:aws:iam::aws:policy/${policy}`]).flat();
 
 bootstrap();
