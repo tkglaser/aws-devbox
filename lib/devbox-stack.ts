@@ -81,7 +81,7 @@ export class DevboxStack extends Stack {
         {
           deviceName: '/dev/sda1',
           mappingEnabled: true,
-          volume: BlockDeviceVolume.ebs(8, {
+          volume: BlockDeviceVolume.ebs(100, {
             deleteOnTermination: true,
             volumeType: EbsDeviceVolumeType.GP2,
             encrypted: true,

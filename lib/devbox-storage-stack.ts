@@ -76,7 +76,7 @@ export class DevboxStorageStack extends Stack {
     const schedules: CfnLifecyclePolicy.ScheduleProperty[] = [];
 
     if ((config.volume?.backup?.daily?.retained ?? 0) > 0) {
-      schedules.push({
+      const commonDailyRule = {
         name: 'Daily',
         createRule: {
           interval: 24,
@@ -87,7 +87,25 @@ export class DevboxStorageStack extends Stack {
           interval: config.volume!.backup!.daily!.retained,
           intervalUnit: 'DAYS',
         },
-      });
+      };
+      if (config.volume?.backup?.crossRegionBackupTo) {
+        schedules.push({
+          ...commonDailyRule,
+          crossRegionCopyRules: [
+            {
+              encrypted: true,
+              target: config.volume?.backup?.crossRegionBackupTo,
+              copyTags: true,
+              retainRule: {
+                interval: 3,
+                intervalUnit: 'DAYS',
+              },
+            },
+          ],
+        });
+      } else {
+        schedules.push(commonDailyRule);
+      }
     }
 
     if ((config.volume?.backup?.weekly?.retained ?? 0) > 0) {

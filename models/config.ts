@@ -170,6 +170,7 @@ export interface Config {
       daily?: EBSSnapshotSettings;
       weekly?: EBSSnapshotSettings;
       monthly?: EBSSnapshotSettings;
+      crossRegionBackupTo?: string;
     };
   };
 
