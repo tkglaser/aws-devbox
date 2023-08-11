@@ -1,9 +1,14 @@
 import { runAs } from './utils/ubuntu-commands';
 import { UserDataBuilder } from './utils/user-data-builder';
 
-export function nodeAndTools(userData: UserDataBuilder, props: { user: string }) {
+export function nodeAndTools(
+  userData: UserDataBuilder,
+  props: { user: string; features: { node?: { version: string } } },
+) {
   userData
-    .beforeAptInstall(`cd ~ && curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -`)
+    .beforeAptInstall(
+      `cd ~ && curl -fsSL https://deb.nodesource.com/setup_${props.features.node!.version}.x | sudo -E bash -`,
+    )
     .aptInstall('nodejs')
     .cmd(
       `sudo npm i -g pnpm @microsoft/rush aws-cdk`,

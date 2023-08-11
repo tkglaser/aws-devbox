@@ -78,29 +78,39 @@ function updateSshConfig() {
   const sshConfig = new TextFile(os.homedir(), '.ssh/config');
 
   const devboxConfig: string[] = [];
-  const remotePorts = [config.ports?.vsCodeServer ?? 3000, ...(config.ports?.remoteToLocal ?? [])];
+  const remotePorts = [];
+  if (config.features.vsCodeServer?.install) {
+    remotePorts.push(config.features.vsCodeServer.port ?? 3000);
+  }
+  if (config.ports?.remoteToLocal?.length) {
+    remotePorts.push(...(config.ports?.remoteToLocal ?? []));
+  }
   if (config.networkingMode === NetworkingMode.AWS_SSM) {
     devboxConfig.push(
       `Host devbox`,
       `  HostName ${env().instanceId}`,
       `  ProxyCommand sh -c "aws --profile ${config.account.profile} ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'"`,
       ``,
-      `Host devbox-ports`,
-      `  HostName ${env().instanceId}`,
-      ...remotePorts.map((port) => `  LocalForward ${port} localhost:${port}`),
-      `  ProxyCommand sh -c "aws --profile ${config.account.profile} ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'"`,
-      ``,
     );
+    if (remotePorts.length) {
+      devboxConfig.push(
+        `Host devbox-ports`,
+        `  HostName ${env().instanceId}`,
+        ...remotePorts.map((port) => `  LocalForward ${port} localhost:${port}`),
+        `  ProxyCommand sh -c "aws --profile ${config.account.profile} ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'"`,
+        ``,
+      );
+    }
   } else {
-    devboxConfig.push(
-      `Host devbox`,
-      `  HostName ${env().instanceIp}`,
-      ``,
-      `Host devbox-ports`,
-      `  HostName ${env().instanceIp}`,
-      ...remotePorts.map((port) => `  LocalForward ${port} localhost:${port}`),
-      ``,
-    );
+    devboxConfig.push(`Host devbox`, `  HostName ${env().instanceIp}`, ``);
+    if (remotePorts.length) {
+      devboxConfig.push(
+        `Host devbox-ports`,
+        `  HostName ${env().instanceIp}`,
+        ...remotePorts.map((port) => `  LocalForward ${port} localhost:${port}`),
+        ``,
+      );
+    }
   }
 
   const restOfConfig: string[] = [];

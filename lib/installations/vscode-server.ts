@@ -58,7 +58,10 @@ const extensions = [
   'ms-python.python',
 ];
 
-export function vsCodeServer(userData: UserDataBuilder, props: { user: string; ports?: { vsCodeServer?: number } }) {
+export function vsCodeServer(
+  userData: UserDataBuilder,
+  props: { user: string; features: { vsCodeServer?: { port?: number } } },
+) {
   const code = `/home/${props.user}/openvscode-server-v${version}-linux-x64/bin/openvscode-server`;
   userData.cmd(
     runAs(
@@ -77,7 +80,7 @@ export function vsCodeServer(userData: UserDataBuilder, props: { user: string; p
     `[Service]`,
     `Type=simple`,
     `User=${props.user}`,
-    `ExecStart=${code} --without-connection-token --port ${props.ports?.vsCodeServer ?? 3000}`,
+    `ExecStart=${code} --without-connection-token --port ${props.features.vsCodeServer?.port ?? 3000}`,
     `TimeoutStartSec=0`,
     `RemainAfterExit=yes`,
     ``,

@@ -219,13 +219,6 @@ export interface Config {
 
   ports?: {
     /**
-     * The port for running VS Code Server.
-     *
-     * @default 3000
-     */
-    vsCodeServer?: number;
-
-    /**
      * Ports to forward from the remote machine to the local machine
      */
     remoteToLocal?: number[];
@@ -239,4 +232,34 @@ export interface Config {
    * will then also be available under the same name on the devbox instance.
    */
   deploymentAccounts: Account[];
+
+  features: {
+    /**
+     * Install Visual Studio Code Server
+     */
+    vsCodeServer?: {
+      install: true;
+      /**
+       * The port for running VS Code Server.
+       *
+       * @default 3000
+       */
+      port?: number;
+    };
+
+    /**
+     * Install Node
+     */
+    node?: {
+      install: true;
+      version: '16' | '18' | '20';
+    };
+
+    /**
+     * Install Docker
+     */
+    docker?: {
+      install: true;
+    };
+  };
 }

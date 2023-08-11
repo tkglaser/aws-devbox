@@ -21,9 +21,18 @@ export function createUserData(props: { scope: IConstruct; volume: Volume; insta
   awsCli(userData);
   mountExternalVolume(userData, props.volume, config);
   copyAwsConfig(userData, config);
-  nodeAndTools(userData, config);
-  vsCodeServer(userData, config);
-  docker(userData, config);
+
+  if (config.features.node?.install) {
+    nodeAndTools(userData, config);
+  }
+
+  if (config.features.vsCodeServer?.install) {
+    vsCodeServer(userData, config);
+  }
+
+  if (config.features.docker?.install) {
+    docker(userData, config);
+  }
 
   return userData.render(props.scope, props.instanceRole);
 }
