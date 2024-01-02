@@ -17,7 +17,7 @@ export class DevboxDeploymentStack extends Stack {
     super(scope, id, props);
 
     const deploymentRole = new Role(this, 'DeploymentRole', {
-      roleName: deploymentRoleName(config.user, config.account.id),
+      roleName: deploymentRoleName(config.user, config.account.id, config.account.region),
       assumedBy: new AccountPrincipal(Stack.of(props.instanceRole).account),
       inlinePolicies: props.deploymentAccountPolicies ?? {},
     });

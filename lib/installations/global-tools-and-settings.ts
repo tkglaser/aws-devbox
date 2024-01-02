@@ -15,7 +15,9 @@ export function globalToolsAndSettings(
       `sudo locale-gen ${props.locale}`,
       `sudo update-locale LANG=${props.locale}`,
       `sudo timedatectl set-timezone ${props.timeZone}`,
+      runAs(props.user, `echo "export UNISONLOCALHOSTNAME=devbox" >> ~/.bashrc`),
       runAs(props.user, `git config --global user.name "${props.userName}"`),
       runAs(props.user, `git config --global user.email "${props.email}"`),
+      runAs(props.user, `echo "export NODE_OPTIONS=--max-old-space-size=4096" >> ~/.bashrc`),
     );
 }

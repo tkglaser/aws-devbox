@@ -12,6 +12,7 @@ import { vsCodeServer } from './vscode-server';
 import { docker } from './docker';
 import { UserDataBuilder } from './utils/user-data-builder';
 import { awsCli } from './aws-cli';
+import { devbox } from './devbox';
 
 export function createUserData(props: { scope: IConstruct; volume: Volume; instanceRole: Role }) {
   const userData = new UserDataBuilder();
@@ -32,6 +33,10 @@ export function createUserData(props: { scope: IConstruct; volume: Volume; insta
 
   if (config.features.docker?.install) {
     docker(userData, config);
+  }
+
+  if (config.features.devbox?.install) {
+    devbox(userData, config);
   }
 
   return userData.render(props.scope, props.instanceRole);

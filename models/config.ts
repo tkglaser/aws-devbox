@@ -261,5 +261,14 @@ export interface Config {
     docker?: {
       install: true;
     };
+
+    /**
+     * Jetpack Devbox
+     *
+     * @see https://www.jetpack.io/devbox
+     */
+    devbox?: {
+      install: true;
+    };
   };
 }

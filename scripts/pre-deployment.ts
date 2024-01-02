@@ -66,7 +66,11 @@ function renderAwsConfig() {
       `[profile ${deploymentAccount.profile}]`,
       `output = json`,
       `region = ${deploymentAccount.region}`,
-      `role_arn = arn:aws:iam::${deploymentAccount.id}:role/${deploymentRoleName(config.user, config.account.id)}`,
+      `role_arn = arn:aws:iam::${deploymentAccount.id}:role/${deploymentRoleName(
+        config.user,
+        config.account.id,
+        config.account.region,
+      )}`,
       `credential_source = Ec2InstanceMetadata`,
       ``,
     );

@@ -1,4 +1,3 @@
-import { runAs } from './utils/ubuntu-commands';
 import { UserDataBuilder } from './utils/user-data-builder';
 
 export function nodeAndTools(
@@ -11,7 +10,8 @@ export function nodeAndTools(
     )
     .aptInstall('nodejs')
     .cmd(
-      `sudo npm i -g pnpm @microsoft/rush aws-cdk`,
-      runAs(props.user, `echo "export NODE_OPTIONS=--max-old-space-size=4096" >> ~/.bashrc`),
+      `sudo corepack enable`,
+      `sudo corepack prepare pnpm@8.6.3 --activate`,
+      `sudo npm i -g @microsoft/rush aws-cdk`,
     );
 }
