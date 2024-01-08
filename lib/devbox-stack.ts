@@ -74,7 +74,10 @@ export class DevboxStack extends Stack {
       securityGroup,
       instanceType: config.instance.type,
       machineImage,
+
+      // deprecated, awaiting fix https://github.com/aws/aws-cdk/issues/28478
       keyName: config.sshKey.name,
+
       role: instanceRole,
       userDataCausesReplacement: true,
       blockDevices: [

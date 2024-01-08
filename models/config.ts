@@ -95,12 +95,30 @@ export interface Config {
    */
   timeZone: string;
 
-  /**
-   * The OS locale.
-   *
-   * @example en_GB.UTF-8
-   */
-  locale: string;
+  language: {
+    /**
+     * The OS locale.
+     *
+     * Ensure, that for non-default locales, the relevant language pack is installed.
+     *
+     * @see `languagePacks`
+     *
+     * @example en_GB.UTF-8
+     */
+    defaultLocale: string;
+
+    /**
+     * Additional OS language packs to install
+     */
+    languagePacks?: string[];
+
+    /**
+     * Other locales to install.
+     *
+     * The default locale is installed automatically.
+     */
+    locales?: string[];
+  };
 
   /**
    * The networking configuration used to connect to your devbox.

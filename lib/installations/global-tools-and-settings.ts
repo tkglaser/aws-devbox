@@ -3,17 +3,26 @@ import { UserDataBuilder } from './utils/user-data-builder';
 
 export function globalToolsAndSettings(
   userData: UserDataBuilder,
-  props: { user: string; userName: string; email: string; timeZone: string; locale: string },
+  props: {
+    user: string;
+    userName: string;
+    email: string;
+    timeZone: string;
+    language: { languagePacks?: string[]; locales?: string[]; defaultLocale: string };
+  },
 ) {
+  const aptLanguagePacks = (props.language.languagePacks ?? []).map((l) => `language-pack-${l}`);
+  const localeGenCommands = (props.language.locales ?? []).map((l) => `sudo locale-gen ${l}`);
+  localeGenCommands.push(props.language.defaultLocale);
   userData
     .beforeAptInstall('sudo apt-get update -y', 'sudo apt-get install -y --no-install-recommends apt-utils')
-    .aptInstall('locales', 'git', 'unison', 'nano', 'mc', 'build-essential', 'python3-pip')
+    .aptInstall('locales', 'git', 'unison', 'nano', 'mc', 'build-essential', 'python3-pip', ...aptLanguagePacks)
     .cmd(
       'sudo pip3 install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz',
       'sudo mkdir -p /opt/aws/bin',
       'sudo ln -s /usr/local/bin/cfn-signal /opt/aws/bin/cfn-signal',
-      `sudo locale-gen ${props.locale}`,
-      `sudo update-locale LANG=${props.locale}`,
+      ...localeGenCommands,
+      `sudo update-locale LANG=${props.language.defaultLocale}`,
       `sudo timedatectl set-timezone ${props.timeZone}`,
       runAs(props.user, `echo "export UNISONLOCALHOSTNAME=devbox" >> ~/.bashrc`),
       runAs(props.user, `git config --global user.name "${props.userName}"`),
