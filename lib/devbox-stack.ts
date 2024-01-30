@@ -4,6 +4,7 @@ import {
   EbsDeviceVolumeType,
   ISubnet,
   Instance,
+  KeyPair,
   MachineImage,
   OperatingSystemType,
   Peer,
@@ -67,6 +68,8 @@ export class DevboxStack extends Stack {
       securityGroup.addIngressRule(Peer.ipv4(`${publicIp}/32`), Port.tcp(22));
     }
 
+    const keyPair = KeyPair.fromKeyPairName(this, 'KeyPair', config.sshKey.name);
+
     const inst = new Instance(this, 'DevBox', {
       instanceName: 'devbox',
       vpc: props.vpc,
@@ -74,10 +77,7 @@ export class DevboxStack extends Stack {
       securityGroup,
       instanceType: config.instance.type,
       machineImage,
-
-      // deprecated, awaiting fix https://github.com/aws/aws-cdk/issues/28478
-      keyName: config.sshKey.name,
-
+      keyPair,
       role: instanceRole,
       userDataCausesReplacement: true,
       blockDevices: [

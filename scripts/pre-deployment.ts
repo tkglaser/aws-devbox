@@ -21,28 +21,35 @@ async function getIpAndSaveToContext() {
   cdkContext.content = { ...cdkContext.content, currentPublicIp };
 }
 
+type IpMethod = {
+  url: string;
+  map: (r: superagent.Response) => string;
+};
+
 async function getIpOrExit() {
   console.log('Checking public IP...');
 
-  console.log('Trying ipify...');
-  try {
-    const res = await getUrl<{ ip: string }>('api.ipify.org/?format=json');
-    return res.ip;
-  } catch {}
+  const methods: IpMethod[] = [
+    { url: 'https://checkip.amazonaws.com', map: (r) => r.text.trim() },
+    { url: 'https://api.ipify.org/?format=json', map: (r) => r.body.ip },
+    { url: 'https://api.bigdatacloud.net/data/client-ip', map: (r) => r.body.ipString },
+  ];
 
-  console.log('Trying bigdatacloud...');
-  try {
-    const res = await getUrl<{ ipString: string }>('https://api.bigdatacloud.net/data/client-ip');
-    return res.ipString;
-  } catch {}
+  for (const { url, map } of methods) {
+    console.log(`Trying [${url}]...`);
+    try {
+      const res = await getUrl(url).then(map);
+      return res;
+    } catch {}
+  }
 
   console.error('Unable to get IP');
   process.exit(1);
 }
 
-function getUrl<T>(url: string) {
+function getUrl(url: string): Promise<superagent.Response> {
   // We're not waiting longer than 2 seconds!
-  return new Promise<T>((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const handle = setTimeout(() => {
       reject('timed out');
     }, 2000);
@@ -52,7 +59,7 @@ function getUrl<T>(url: string) {
       if (err) {
         reject(err);
       } else {
-        resolve(res.body);
+        resolve(res);
       }
     });
   });
