@@ -1,5 +1,5 @@
 import { UserData } from 'aws-cdk-lib/aws-ec2';
-import { Role } from 'aws-cdk-lib/aws-iam';
+import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Asset } from 'aws-cdk-lib/aws-s3-assets';
 import { IConstruct } from 'constructs';
 
@@ -46,7 +46,7 @@ export class UserDataBuilder {
     return this;
   }
 
-  render(scope: IConstruct, instanceRole: Role): UserData {
+  render(scope: IConstruct, instanceRole: IRole): UserData {
     const userData = UserData.forLinux();
     this.commands
       .filter((cmd) => cmd.type === CommandType.BeforeAptInstall)

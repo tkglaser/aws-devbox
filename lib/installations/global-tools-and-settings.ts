@@ -15,7 +15,7 @@ export function globalToolsAndSettings(
   const localeGenCommands = (props.language.locales ?? []).map((l) => `sudo locale-gen ${l}`);
   localeGenCommands.push(props.language.defaultLocale);
   userData
-    .beforeAptInstall('sudo apt-get update -y', 'sudo apt-get install -y --no-install-recommends apt-utils')
+    .beforeAptInstall('sudo apt-get update -y', 'sudo apt-get install -y --no-install-recommends apt-utils gpg')
     .aptInstall('locales', 'git', 'unison', 'nano', 'mc', 'build-essential', 'python3-pip', ...aptLanguagePacks)
     .cmd(
       'sudo pip3 install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz',

@@ -1,2 +1,2 @@
-export const deploymentRoleName = (user: string, account: string, region: string) =>
-  `deploy-from-${account}-${user}-${region}`;
+export const deploymentRoleName = (user: string, profile: string) =>
+  `${user}-access-${profile.replaceAll('+', '-')}`;

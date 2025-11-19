@@ -1,17 +1,17 @@
+import { chown, runAs } from './utils/ubuntu-commands';
 import { UserDataBuilder } from './utils/user-data-builder';
+
+const installScript = `/tmp/nvminst.sh`;
 
 export function nodeAndTools(
   userData: UserDataBuilder,
-  props: { user: string; features: { node?: { version: string } } },
+  props: { user: string; },
 ) {
-  userData
-    .beforeAptInstall(
-      `cd ~ && curl -fsSL https://deb.nodesource.com/setup_${props.features.node!.version}.x | sudo -E bash -`,
-    )
-    .aptInstall('nodejs')
-    .cmd(
-      `sudo corepack enable`,
-      `sudo corepack prepare pnpm@8.6.3 --activate`,
-      `sudo npm i -g @microsoft/rush aws-cdk`,
-    );
+  userData.cmd(
+    `cd ~`,
+    `curl "https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh" -o "${installScript}"`,
+    chown(props.user, installScript),
+    `chmod +x ${installScript}`,
+    runAs(props.user, installScript),
+  );
 }

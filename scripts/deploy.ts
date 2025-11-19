@@ -9,7 +9,7 @@ runCommand({
     '--profile',
     config.account.profile,
     '--concurrency',
-    '4',
+    '8',
     '--require-approval',
     'never',
     '--outputs-file',

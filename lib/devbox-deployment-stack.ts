@@ -1,31 +1,34 @@
-import { CfnOutput, Stack, StackProps } from 'aws-cdk-lib';
-import { AccountPrincipal, IRole, PolicyDocument, PolicyStatement, Role } from 'aws-cdk-lib/aws-iam';
+import { Stack, StackProps } from 'aws-cdk-lib';
+import { AccountPrincipal, IRole, Role, RoleProps } from 'aws-cdk-lib/aws-iam';
 import { IConstruct } from 'constructs';
 
 import { config } from '../config/config';
 import { deploymentRoleName } from '../util/names';
 
+interface Access {
+  accessRole: Omit<RoleProps, 'roleName' | 'assumedBy'>;
+  profile: string;
+}
+
 export interface DevboxDeploymentStackProps extends StackProps {
   instanceRole: IRole;
-  deploymentAccountPolicies?: {
-    [name: string]: PolicyDocument;
-  };
+  access: Access[];
 }
 
 export class DevboxDeploymentStack extends Stack {
   constructor(scope: IConstruct, id: string, props: DevboxDeploymentStackProps) {
     super(scope, id, props);
 
-    const deploymentRole = new Role(this, 'DeploymentRole', {
-      roleName: deploymentRoleName(config.user, config.account.id, config.account.region),
-      assumedBy: new AccountPrincipal(Stack.of(props.instanceRole).account),
-      inlinePolicies: props.deploymentAccountPolicies ?? {},
-    });
+    let i = 0;
 
-    deploymentRole.grantAssumeRole(props.instanceRole);
+    for (const { accessRole, profile } of props.access) {
+      const deploymentRole = new Role(this, `DeploymentRole${++i}`, {
+        roleName: deploymentRoleName(config.user, profile),
+        assumedBy: new AccountPrincipal(Stack.of(props.instanceRole).account),
+        ...accessRole,
+      });
 
-    new CfnOutput(this, 'DeploymentRoleARN', {
-      value: deploymentRole.roleArn,
-    });
+      deploymentRole.grantAssumeRole(props.instanceRole);
+    }
   }
 }

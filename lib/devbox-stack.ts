@@ -2,22 +2,19 @@ import { CfnOutput, Stack, StackProps } from 'aws-cdk-lib';
 import {
   BlockDeviceVolume,
   EbsDeviceVolumeType,
+  ISecurityGroup,
   ISubnet,
   Instance,
   KeyPair,
   MachineImage,
   OperatingSystemType,
-  Peer,
-  Port,
-  SecurityGroup,
   Volume,
   Vpc,
 } from 'aws-cdk-lib/aws-ec2';
-import { IRole, ManagedPolicy, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 
 import { config } from '../config/config';
-import { NetworkingMode } from '../models/config';
 import { StartStopSchedule } from './constructs/start-stop-schedule';
 import { createUserData } from './installations';
 
@@ -25,48 +22,20 @@ export interface DevboxStackProps extends StackProps {
   vpc: Vpc;
   vpcSubnet: ISubnet;
   volume: Volume;
+  securityGroup: ISecurityGroup;
+  instanceRole: IRole;
 }
 
 export class DevboxStack extends Stack {
-  public readonly instanceRole: IRole;
-
   constructor(scope: Construct, id: string, props: DevboxStackProps) {
     super(scope, id, props);
 
-    const instanceRole = new Role(this, 'InstanceRole', {
-      assumedBy: new ServicePrincipal('ec2.amazonaws.com'),
-      managedPolicies: [ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore')],
-    });
-
-    instanceRole.addToPolicy(
-      new PolicyStatement({
-        actions: [
-          'codeartifact:GetAuthorizationToken',
-          'codeartifact:GetRepositoryEndpoint',
-          'codeartifact:ReadFromRepository',
-          'sts:GetServiceBearerToken',
-        ],
-        resources: ['*'], // log in to external CA repos
-      }),
-    );
-
-    const userData = createUserData({ scope: this, volume: props.volume, instanceRole });
+    const userData = createUserData({ scope: this, volume: props.volume, instanceRole: props.instanceRole });
 
     const machineImage = MachineImage.fromSsmParameter(config.instance.amiSsmParameter, {
       os: OperatingSystemType.LINUX,
       userData: userData,
     });
-
-    const securityGroup = new SecurityGroup(this, 'SecurityGroup', {
-      description: 'devbox security group',
-      vpc: props.vpc,
-      allowAllOutbound: true,
-    });
-
-    if (config.networkingMode === NetworkingMode.PUBLIC_IP) {
-      const publicIp = this.node.getContext('currentPublicIp');
-      securityGroup.addIngressRule(Peer.ipv4(`${publicIp}/32`), Port.tcp(22));
-    }
 
     const keyPair = KeyPair.fromKeyPairName(this, 'KeyPair', config.sshKey.name);
 
@@ -74,11 +43,11 @@ export class DevboxStack extends Stack {
       instanceName: 'devbox',
       vpc: props.vpc,
       vpcSubnets: { subnets: [props.vpcSubnet] },
-      securityGroup,
+      securityGroup: props.securityGroup,
       instanceType: config.instance.type,
       machineImage,
       keyPair,
-      role: instanceRole,
+      role: props.instanceRole,
       userDataCausesReplacement: true,
       blockDevices: [
         {
@@ -86,7 +55,7 @@ export class DevboxStack extends Stack {
           mappingEnabled: true,
           volume: BlockDeviceVolume.ebs(100, {
             deleteOnTermination: true,
-            volumeType: EbsDeviceVolumeType.GP2,
+            volumeType: EbsDeviceVolumeType.GP3,
             encrypted: true,
           }),
         },
@@ -97,10 +66,8 @@ export class DevboxStack extends Stack {
 
     props.volume.grantAttachVolumeByResourceTag(inst.grantPrincipal, [inst]);
 
-    inst.node.addDependency(instanceRole);
+    inst.node.addDependency(props.instanceRole);
     inst.node.addDependency(props.volume);
-
-    this.instanceRole = inst.role;
 
     if (config.autoSwitch) {
       new StartStopSchedule(this, 'StartStopSchedule', {

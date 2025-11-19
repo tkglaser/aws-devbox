@@ -1,12 +1,15 @@
 import { Stack, StackProps } from 'aws-cdk-lib';
-import { ISubnet, IpAddresses, SubnetConfiguration, SubnetType, Vpc } from 'aws-cdk-lib/aws-ec2';
+import { ISecurityGroup, ISubnet, SecurityGroup, SubnetConfiguration, SubnetType, Vpc } from 'aws-cdk-lib/aws-ec2';
+import { IRole, ManagedPolicy, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
+
 import { config } from '../config/config';
-import { NetworkingMode } from '../models/config';
 
 export class DevboxVpcStack extends Stack {
   public vpc: Vpc;
   public vpcSubnet: ISubnet;
+  public securityGroup: ISecurityGroup;
+  public instanceRole: IRole;
 
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
@@ -19,23 +22,42 @@ export class DevboxVpcStack extends Stack {
       },
     ];
 
-    if (config.networkingMode === NetworkingMode.AWS_SSM) {
-      subnetConfiguration.push({
-        cidrMask: 17,
-        name: 'private',
-        subnetType: SubnetType.PRIVATE_WITH_EGRESS,
-      });
-    }
+    subnetConfiguration.push({
+      cidrMask: 17,
+      name: 'private',
+      subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+    });
 
     this.vpc = new Vpc(this, 'DevBoxVpc', {
       maxAzs: 1,
       subnetConfiguration,
     });
 
-    if (config.networkingMode === NetworkingMode.AWS_SSM) {
-      this.vpcSubnet = this.vpc.privateSubnets[0];
-    } else {
+    this.securityGroup = new SecurityGroup(this, 'SecurityGroup', {
+      description: 'devbox security group',
+      vpc: this.vpc,
+      allowAllOutbound: true,
+    });
+
+    if (config.needsPublicIp) {
       this.vpcSubnet = this.vpc.publicSubnets[0];
+    } else {
+      this.vpcSubnet = this.vpc.privateSubnets[0];
     }
+
+    for (const { peer, port, description } of config.securityGroupRules?.inbound ?? []) {
+      this.securityGroup.addIngressRule(peer, port, description);
+    }
+
+    for (const { peer, port, description } of config.securityGroupRules?.outbound ?? []) {
+      this.securityGroup.addEgressRule(peer, port, description);
+    }
+
+    const instanceRole = new Role(this, 'InstanceRole', {
+      assumedBy: new ServicePrincipal('ec2.amazonaws.com'),
+      managedPolicies: [ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore')],
+    });
+
+    this.instanceRole = instanceRole;
   }
 }

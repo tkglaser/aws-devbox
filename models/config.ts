@@ -1,6 +1,6 @@
-import { InstanceType, VolumeProps } from 'aws-cdk-lib/aws-ec2';
+import { IPeer, InstanceType, Port, VolumeProps } from 'aws-cdk-lib/aws-ec2';
 import { Schedule } from 'aws-cdk-lib/aws-events';
-import { PolicyDocument } from 'aws-cdk-lib/aws-iam';
+import { PolicyDocument, RoleProps } from 'aws-cdk-lib/aws-iam';
 
 export interface BaseAccount {
   /**
@@ -22,44 +22,13 @@ export interface BaseAccount {
    * For deployment accounts, this determines the region of the CloudFormation stacks.
    */
   region: string;
-
-  /**
-   * Managed policies to apply to the CDK Toolkit Stack
-   */
-  bootstrapPolicies?: string[];
 }
 
 export interface Account extends BaseAccount {
   /**
-   * Inline policies to create in the deployment accounts
+   * Settings such as permissions for the access role to the account
    */
-  policies?: {
-    [name: string]: PolicyDocument;
-  };
-}
-
-export const enum NetworkingMode {
-  /**
-   * Using AWS Session Manager (recommended).
-   *
-   * You need to install the Session Manager plugin for the AWS CLI
-   * @see https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html
-   *
-   * The devbox instance will be installed into a private subnet and will not
-   * be directly reachable from the public internet.
-   */
-  AWS_SSM,
-
-  /**
-   * Using a public IP.
-   *
-   * If you cannot use the AWS Session Manager plugin, use this setting. The instance will be
-   * created in a public subnet and will be assigned a public IP. A network security group will
-   * be created and configured such that access is only possible from your public IP. When your
-   * public IP changes, you need to run the deployment script again which will update the security
-   * group configuration.
-   */
-  PUBLIC_IP,
+  accessRole: Omit<RoleProps, 'roleName' | 'assumedBy'>;
 }
 
 interface EBSSnapshotSettings {
@@ -67,6 +36,12 @@ interface EBSSnapshotSettings {
    * Number of snapshots that are retained.
    */
   retained?: number;
+}
+
+interface SecurityGroupRule {
+  peer: IPeer;
+  port: Port;
+  description?: string;
 }
 
 export interface Config {
@@ -121,11 +96,11 @@ export interface Config {
   };
 
   /**
-   * The networking configuration used to connect to your devbox.
-   * Please look at the options of `NetworkingMode` carefully to decide.
-   * Changing this later may require you to tear down the devbox and the VPC.
+   * Set this to `true` if the box needs a public IP
+   *
+   * @default false
    */
-  networkingMode: NetworkingMode;
+  needsPublicIp?: true;
 
   /**
    * Settings related to the EC2 instance
@@ -177,7 +152,7 @@ export interface Config {
      *
      * @default 100GB GP3
      */
-    properties?: Omit<VolumeProps, 'encrypted'>;
+    properties?: Partial<Omit<VolumeProps, 'encrypted'>>;
 
     /**
      * EBS Snapshot settings
@@ -242,6 +217,11 @@ export interface Config {
     remoteToLocal?: number[];
   };
 
+  securityGroupRules?: {
+    inbound?: SecurityGroupRule[];
+    outbound?: SecurityGroupRule[];
+  };
+
   /**
    * List of AWS accounts that the devbox will have access to.
    *
@@ -270,7 +250,6 @@ export interface Config {
      */
     node?: {
       install: true;
-      version: '16' | '18' | '20';
     };
 
     /**
@@ -281,12 +260,26 @@ export interface Config {
     };
 
     /**
-     * Jetpack Devbox
-     *
-     * @see https://www.jetpack.io/devbox
+     * OpenJDK
      */
-    devbox?: {
+    java?: {
       install: true;
+      package: string;
+    };
+
+    /**
+     * Maven
+     */
+    maven?: {
+      install: true;
+    };
+
+    /**
+     * .NET
+     */
+    dotnet?: {
+      install: true;
+      versions: ('8.0' | '7.0' | '6.0')[];
     };
   };
 }

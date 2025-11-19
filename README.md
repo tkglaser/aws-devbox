@@ -29,7 +29,7 @@ Create a file in `config/config.ts`. For example, like this:
 import { InstanceClass, InstanceSize, InstanceType } from 'aws-cdk-lib/aws-ec2';
 import { Schedule } from 'aws-cdk-lib/aws-events';
 
-import { Config, NetworkingMode } from '../models/config';
+import { Config } from '../models/config';
 
 export const config: Config = {
   user: 'useronbox',
@@ -37,7 +37,6 @@ export const config: Config = {
   email: 'john@example.com',
   timeZone: 'Europe/London',
   locale: 'en_GB.UTF-8',
-  networkingMode: NetworkingMode.AWS_SSM,
   account: {
     id: '111111111111',
     profile: 'my-dev-account',

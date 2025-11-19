@@ -5,7 +5,6 @@ import * as path from 'path';
 
 import { config } from '../config/config';
 import { env } from '../lib/env';
-import { NetworkingMode } from '../models/config';
 import { ec2Client } from '../util/client';
 import { JsonFile } from '../util/json-file';
 import { runCommand } from '../util/run-command';
@@ -39,17 +38,6 @@ async function startInstance() {
   await waitUntilInstanceStatusOk({ client: ec2, maxWaitTime: 10 * 60 }, params);
 
   console.log('Instance is running');
-
-  if (config.networkingMode === NetworkingMode.PUBLIC_IP) {
-    const describeResult = await ec2.describeInstances(params);
-
-    const publicIp = describeResult.Reservations![0].Instances![0].PublicIpAddress!;
-    if (typeof publicIp === 'undefined') {
-      throw new Error('Unable to determine IP!');
-    }
-
-    saveValueToEnv('DEVBOX_IP', publicIp);
-  }
 }
 
 async function resetSshKey() {
@@ -85,32 +73,21 @@ function updateSshConfig() {
   if (config.ports?.remoteToLocal?.length) {
     remotePorts.push(...(config.ports?.remoteToLocal ?? []));
   }
-  if (config.networkingMode === NetworkingMode.AWS_SSM) {
+
+  devboxConfig.push(
+    `Host devbox`,
+    `  HostName ${env().instanceId}`,
+    `  ProxyCommand sh -c "aws --region ${config.account.region} --profile ${config.account.profile} ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'"`,
+    ``,
+  );
+  if (remotePorts.length) {
     devboxConfig.push(
-      `Host devbox`,
+      `Host devbox-ports`,
       `  HostName ${env().instanceId}`,
-      `  ProxyCommand sh -c "aws --profile ${config.account.profile} ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'"`,
+      ...remotePorts.map((port) => `  LocalForward ${port} localhost:${port}`),
+      `  ProxyCommand sh -c "aws --region ${config.account.region} --profile ${config.account.profile} ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'"`,
       ``,
     );
-    if (remotePorts.length) {
-      devboxConfig.push(
-        `Host devbox-ports`,
-        `  HostName ${env().instanceId}`,
-        ...remotePorts.map((port) => `  LocalForward ${port} localhost:${port}`),
-        `  ProxyCommand sh -c "aws --profile ${config.account.profile} ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'"`,
-        ``,
-      );
-    }
-  } else {
-    devboxConfig.push(`Host devbox`, `  HostName ${env().instanceIp}`, ``);
-    if (remotePorts.length) {
-      devboxConfig.push(
-        `Host devbox-ports`,
-        `  HostName ${env().instanceIp}`,
-        ...remotePorts.map((port) => `  LocalForward ${port} localhost:${port}`),
-        ``,
-      );
-    }
   }
 
   const restOfConfig: string[] = [];
