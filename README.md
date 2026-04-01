@@ -28,25 +28,27 @@ Create a file in `config/config.ts`. For example, like this:
 ```ts
 import { InstanceClass, InstanceSize, InstanceType } from 'aws-cdk-lib/aws-ec2';
 import { Schedule } from 'aws-cdk-lib/aws-events';
+import { ManagedPolicy } from 'aws-cdk-lib/aws-iam';
 
-import { Config } from '../models/config';
+import { AuthenticationType, Config } from '../models/config';
 
 export const config: Config = {
   user: 'useronbox',
   userName: 'John Doe',
   email: 'john@example.com',
   timeZone: 'Europe/London',
-  locale: 'en_GB.UTF-8',
+  language: {
+    defaultLocale: 'en_GB.UTF-8',
+  },
   account: {
-    id: '111111111111',
+    id: '123456789012',
     profile: 'my-dev-account',
     region: 'my-region',
-    bootstrapPolicies: ['AdministratorAccess'], // Choose a more restrictive policy if possible
   },
   instance: {
-    type: InstanceType.of(InstanceClass.T3, InstanceSize.XLARGE2),
+    type: InstanceType.of(InstanceClass.M8I_FLEX, InstanceSize.XLARGE4),
     // Latest Ubuntu Minimal Server
-    amiSsmParameter: '/aws/service/canonical/ubuntu/server-minimal/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id',
+    amiSsmParameter: '/aws/service/canonical/ubuntu/server-minimal/24.04/stable/current/amd64/hvm/ebs-gp3/ami-id',
   },
   autoSwitch: { // optionally start and stop the instance at certain times
     on: Schedule.cron({ hour: '8', minute: '0' }), // switch on at 8am
@@ -57,23 +59,23 @@ export const config: Config = {
     file: '/path/to/my-key-name.pem', // file on local disk
   },
   deploymentAccounts: [
-    { // The devbox will be able to access this account
-      id: '222222222222', 
+    {
+      id: '210987654321',
       profile: 'my-test-account',
       region: 'my-region',
-      bootstrapPolicies: ['IAMFullAccess', 'AmazonSSMReadOnlyAccess'] // Policies used for the CDK Toolkit Stack
-      policies: { // The permissions that the devbox will have in the account
-        s3Access: new PolicyDocument({
-          statements: [
-            new PolicyStatement({
-              actions: ['s3:*'],
-              resources: ['*'],
-            }),
-          ],
-        }),
+      authentication: {
+        type: AuthenticationType.INSTANCE_METADATA_ROLE,
+        accessRole: {
+          managedPolicies: [ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess')],
+        },
       }
     },
   ],
+
+  features: {
+    docker: { install: true },
+    node: { install: true, },
+  },
 };
 ```
 
@@ -97,6 +99,12 @@ The devbox will be able to access other AWS accounts if you have configured acco
       id: '222222222222',
       profile: 'my-test-account',
       region: 'eu-west-2',
+      authentication: {
+        type: AuthenticationType.INSTANCE_METADATA_ROLE,
+        accessRole: {
+          managedPolicies: [ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess')],
+        },
+      }
     },
   ],
 ```
@@ -116,6 +124,21 @@ aws --profile my-test-account s3 ls
 ```
 
 Note that the role in the deployment account is called `deploy-from-111111111111-useronbox`. Which permissions the role has can be changed in `lib/devbox-deployment-stack.ts`.
+
+You can also use `accessKeyId` + `secretAccessKey` for direct access. This isn't recommended because it requires storing the secret in S3 which isn't ideal. The definition in the config would look like this
+
+```ts
+    {
+      id: '333333333333',
+      profile: 'my--other-account',
+      region: 'eu-west-2',
+      authentication: {
+        type: AuthenticationType.CREDENTIAL_FILE,
+        accessKeyId: 'my-access-key-id',
+        secretAccessKey: 'my-secret-access-key'
+      }
+    },
+```
 
 ## Connecting to the instance
 The `npm start` will automatically configure your SSH configuration in `~/.ssh/config`.
