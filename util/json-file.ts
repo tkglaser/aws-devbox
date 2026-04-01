@@ -1,6 +1,10 @@
 import { BaseFile } from './base-file';
 
 export class JsonFile<T = any> extends BaseFile<T> {
+  static at<T = any>(...paths: string[]) {
+    return new this<T>(paths);
+  }
+
   protected parse(value: string): T {
     return JSON.parse(value);
   }

@@ -2,7 +2,7 @@ import { InstanceClass, InstanceSize, InstanceType } from 'aws-cdk-lib/aws-ec2';
 import { Schedule } from 'aws-cdk-lib/aws-events';
 import { ManagedPolicy } from 'aws-cdk-lib/aws-iam';
 
-import { Config } from '../models/config';
+import { AuthenticationType, Config } from '../models/config';
 
 /**
  * Example config, create a `config.ts` file in the current folder.
@@ -38,9 +38,12 @@ export const config: Config = {
       id: '210987654321',
       profile: 'my-test-account',
       region: 'my-region',
-      accessRole: {
-        managedPolicies: [ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess')],
-      },
+      authentication: {
+        type: AuthenticationType.INSTANCE_METADATA_ROLE,
+        accessRole: {
+          managedPolicies: [ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess')],
+        },
+      }
     },
   ],
 

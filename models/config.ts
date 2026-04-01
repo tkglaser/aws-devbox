@@ -1,6 +1,28 @@
 import { IPeer, InstanceType, Port, VolumeProps } from 'aws-cdk-lib/aws-ec2';
 import { Schedule } from 'aws-cdk-lib/aws-events';
-import { PolicyDocument, RoleProps } from 'aws-cdk-lib/aws-iam';
+import { RoleProps } from 'aws-cdk-lib/aws-iam';
+
+export const enum AuthenticationType {
+  CREDENTIAL_FILE,
+  INSTANCE_METADATA_ROLE
+}
+
+export interface BaseAuthentication {
+  type: AuthenticationType;
+}
+
+export interface CredentialAuthentication extends BaseAuthentication {
+  type: AuthenticationType.CREDENTIAL_FILE;
+  accessKeyId: string;
+  secretAccessKey: string;
+}
+
+export interface InstanceMetadataRoleAuthentication {
+  type: AuthenticationType.INSTANCE_METADATA_ROLE;
+  accessRole: Omit<RoleProps, 'roleName' | 'assumedBy'>;
+}
+
+export type Authentication = CredentialAuthentication | InstanceMetadataRoleAuthentication;
 
 export interface BaseAccount {
   /**
@@ -26,9 +48,9 @@ export interface BaseAccount {
 
 export interface Account extends BaseAccount {
   /**
-   * Settings such as permissions for the access role to the account
+   * How the devbox will authenticate against this account
    */
-  accessRole: Omit<RoleProps, 'roleName' | 'assumedBy'>;
+  authentication: Authentication;
 }
 
 interface EBSSnapshotSettings {

@@ -9,6 +9,7 @@ import { ec2Client } from '../util/client';
 import { JsonFile } from '../util/json-file';
 import { runCommand } from '../util/run-command';
 import { TextFile } from '../util/text-file';
+import { EnvFile } from '../util/env-file';
 
 async function main() {
   saveInstanceIdToEnv();
@@ -20,8 +21,8 @@ async function main() {
 main();
 
 function saveInstanceIdToEnv() {
-  const cdkOut = new JsonFile<{ DevboxStack: { InstanceId: string } }>(__dirname, '../cdk.out.json');
-  saveValueToEnv('DEVBOX_INSTANCE_ID', cdkOut.content.DevboxStack.InstanceId);
+  const cdkOut = JsonFile.at<{ DevboxStack: { InstanceId: string } }>(__dirname, '../cdk.out.json');
+  saveValueToEnv('DEVBOX_INSTANCE_ID', cdkOut.read().DevboxStack.InstanceId);
 }
 
 async function startInstance() {
@@ -63,7 +64,7 @@ function updateSshConfig() {
     ],
     end: '### End of DEVBOX config block ###',
   };
-  const sshConfig = new TextFile(os.homedir(), '.ssh/config');
+  const sshConfig = TextFile.at(os.homedir(), '.ssh/config');
 
   const devboxConfig: string[] = [];
   const remotePorts = [];
@@ -92,7 +93,7 @@ function updateSshConfig() {
 
   const restOfConfig: string[] = [];
   let insideConfig = false;
-  for (const line of sshConfig.content) {
+  for (const line of sshConfig.read()) {
     if (line === markers.start) {
       insideConfig = true;
     } else if (line === markers.end) {
@@ -102,15 +103,15 @@ function updateSshConfig() {
     }
   }
 
-  sshConfig.content = [markers.start, '', ...markers.notice, '', ...devboxConfig, '', markers.end, ...restOfConfig];
+  sshConfig.write([markers.start, '', ...markers.notice, '', ...devboxConfig, '', markers.end, ...restOfConfig]);
 }
 
 function saveValueToEnv(name: string, value: string) {
-  const envFile = new TextFile(__dirname, '../.env');
-  const env = dotenv.parse(envFile.content.join('\n'));
+  const envFile = EnvFile.at(__dirname, '../.env');
+  const env = envFile.read();
 
   env[name] = value;
 
-  envFile.content = Object.entries(env).map(([key, value]) => `${key}=${value}`);
+  envFile.write(env);
   dotenv.config({ path: path.join(__dirname, '../.env'), override: true });
 }

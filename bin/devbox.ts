@@ -1,11 +1,12 @@
 import { App } from 'aws-cdk-lib';
 
+import { RoleProps } from 'aws-cdk-lib/aws-iam';
 import { config } from '../config/config';
 import { DevboxDeploymentStack } from '../lib/devbox-deployment-stack';
 import { DevboxStack } from '../lib/devbox-stack';
 import { DevboxStorageStack } from '../lib/devbox-storage-stack';
 import { DevboxVpcStack } from '../lib/devbox-vpc-stack';
-import { Account } from '../models/config';
+import { AuthenticationType, InstanceMetadataRoleAuthentication } from '../models/config';
 
 const app = new App();
 
@@ -25,13 +26,21 @@ new DevboxStack(app, 'DevboxStack', {
   instanceRole,
 });
 
-const groupedDeploymentAccounts: Record<string, Account[]> = {};
+const groupedDeploymentAccounts: Record<string, {
+  accessRole: Omit<RoleProps, 'roleName' | 'assumedBy'>;
+  profile: string;
+  region: string;
+}[]> = {};
 
-for (const deploymentAccount of config.deploymentAccounts) {
+for (const deploymentAccount of config.deploymentAccounts.filter(acc => acc.authentication.type === AuthenticationType.INSTANCE_METADATA_ROLE)) {
   if (!groupedDeploymentAccounts[deploymentAccount.id]) {
     groupedDeploymentAccounts[deploymentAccount.id] = [];
   }
-  groupedDeploymentAccounts[deploymentAccount.id].push(deploymentAccount);
+  groupedDeploymentAccounts[deploymentAccount.id].push({
+    profile: deploymentAccount.profile,
+    accessRole: (deploymentAccount.authentication as InstanceMetadataRoleAuthentication).accessRole,
+    region: deploymentAccount.region
+  });
 }
 
 for (const account of Object.keys(groupedDeploymentAccounts)) {

@@ -2,11 +2,11 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 export abstract class BaseFile<T> {
-  private _content: T;
+  private content: T;
   private hasBeenRead = false;
   private readonly fileName: string;
 
-  constructor(...paths: string[]) {
+  protected constructor(paths: string[]) {
     this.fileName = path.join(...paths);
   }
 
@@ -14,25 +14,26 @@ export abstract class BaseFile<T> {
   protected abstract stringify(value: T): string;
   protected abstract emptyValue(): T;
 
-  get content() {
+  read() {
     if (!this.hasBeenRead) {
       try {
-        this._content = this.parse(fs.readFileSync(this.fileName).toString('utf8'));
+        this.content = this.parse(fs.readFileSync(this.fileName).toString('utf8'));
       } catch (e) {
         if ((e as { code: 'ENOENT' }).code === 'ENOENT') {
           // doesn't exist yet, setting empty content
-          this._content = this.emptyValue();
+          this.content = this.emptyValue();
         } else {
           throw e;
         }
       }
       this.hasBeenRead = true;
     }
-    return this._content;
+    return this.content;
   }
 
-  set content(value: T) {
-    this._content = value;
+  write(value: T) {
+    this.content = value;
     fs.writeFileSync(this.fileName, this.stringify(value));
+    return this;
   }
 }

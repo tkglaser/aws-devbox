@@ -10,5 +10,6 @@ export function copyAwsConfig(
   },
 ) {
   userData.s3Copy(path.join(__dirname, '../../assets/aws.config'), `/home/${props.user}/.aws/config`);
+  userData.s3Copy(path.join(__dirname, '../../assets/aws.credentials'), `/home/${props.user}/.aws/credentials`);
   userData.cmd(chown(props.user, `/home/${props.user}/.aws`));
 }
