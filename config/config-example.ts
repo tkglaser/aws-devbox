@@ -2,7 +2,7 @@ import { InstanceClass, InstanceSize, InstanceType } from 'aws-cdk-lib/aws-ec2';
 import { Schedule } from 'aws-cdk-lib/aws-events';
 import { ManagedPolicy } from 'aws-cdk-lib/aws-iam';
 
-import { AuthenticationType, Config } from '../models/config';
+import { AuthenticationType, type Config } from '../models/config';
 
 /**
  * Example config, create a `config.ts` file in the current folder.
@@ -43,12 +43,12 @@ export const config: Config = {
         accessRole: {
           managedPolicies: [ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess')],
         },
-      }
+      },
     },
   ],
 
   features: {
     docker: { install: true },
-    node: { install: true, },
+    node: { install: true },
   },
 };

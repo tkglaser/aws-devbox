@@ -1,5 +1,5 @@
 import { $, runAs } from './utils/ubuntu-commands';
-import { UserDataBuilder } from './utils/user-data-builder';
+import type { UserDataBuilder } from './utils/user-data-builder';
 
 const version = `3.9.6`;
 

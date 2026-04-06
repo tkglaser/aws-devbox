@@ -1,12 +1,13 @@
-import { Volume } from 'aws-cdk-lib/aws-ec2';
+import type { Volume } from 'aws-cdk-lib/aws-ec2';
 
-import { IRole } from 'aws-cdk-lib/aws-iam';
-import { IConstruct } from 'constructs';
+import type { IRole } from 'aws-cdk-lib/aws-iam';
+import type { IConstruct } from 'constructs';
 import { config } from '../../config/config';
 import { awsCli } from './aws-cli';
 import { copyAwsConfig } from './copy-aws-config';
 import { createUser } from './create-user';
 import { docker } from './docker';
+import { dotnet } from './dotnet';
 import { globalToolsAndSettings } from './global-tools-and-settings';
 import { java } from './java';
 import { maven } from './maven';
@@ -14,7 +15,6 @@ import { mountExternalVolume } from './mount-ebs-volume';
 import { nodeAndTools } from './node';
 import { UserDataBuilder } from './utils/user-data-builder';
 import { vsCodeServer } from './vscode-server';
-import { dotnet } from './dotnet';
 
 export function createUserData(props: { scope: IConstruct; volume: Volume; instanceRole: IRole }) {
   const userData = new UserDataBuilder();

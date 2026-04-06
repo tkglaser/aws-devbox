@@ -1,8 +1,8 @@
 import { Stack } from 'aws-cdk-lib';
-import { Schedule } from 'aws-cdk-lib/aws-events';
+import type { Schedule } from 'aws-cdk-lib/aws-events';
 import { PolicyDocument, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { CfnSchedule, CfnScheduleGroup, CfnScheduleProps } from 'aws-cdk-lib/aws-scheduler';
-import { Construct, IConstruct } from 'constructs';
+import { CfnSchedule, CfnScheduleGroup, type CfnScheduleProps } from 'aws-cdk-lib/aws-scheduler';
+import { Construct, type IConstruct } from 'constructs';
 
 export interface StartStopScheduleProps {
   instanceId: string;
@@ -23,7 +23,11 @@ export class StartStopSchedule extends Construct {
             new PolicyStatement({
               actions: ['ec2:startInstances', 'ec2:stopInstances'],
               resources: [
-                Stack.of(this).formatArn({ service: 'ec2', resource: 'instance', resourceName: props.instanceId }),
+                Stack.of(this).formatArn({
+                  service: 'ec2',
+                  resource: 'instance',
+                  resourceName: props.instanceId,
+                }),
               ],
             }),
           ],

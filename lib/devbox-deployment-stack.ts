@@ -1,6 +1,6 @@
-import { Stack, StackProps } from 'aws-cdk-lib';
-import { AccountPrincipal, IRole, Role, RoleProps } from 'aws-cdk-lib/aws-iam';
-import { IConstruct } from 'constructs';
+import { Stack, type StackProps } from 'aws-cdk-lib';
+import { AccountPrincipal, type IRole, Role, type RoleProps } from 'aws-cdk-lib/aws-iam';
+import type { IConstruct } from 'constructs';
 
 import { config } from '../config/config';
 import { deploymentRoleName } from '../util/names';

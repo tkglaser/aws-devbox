@@ -1,8 +1,8 @@
-import { RemovalPolicy, Size, Stack, StackProps } from 'aws-cdk-lib';
+import { RemovalPolicy, Size, Stack, type StackProps } from 'aws-cdk-lib';
 import { CfnLifecyclePolicy } from 'aws-cdk-lib/aws-dlm';
-import { EbsDeviceVolumeType, ISubnet, Volume, Vpc } from 'aws-cdk-lib/aws-ec2';
+import { EbsDeviceVolumeType, type ISubnet, Volume, type Vpc } from 'aws-cdk-lib/aws-ec2';
 import { PolicyDocument, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { Construct } from 'constructs';
+import type { Construct } from 'constructs';
 import { config } from '../config/config';
 
 export interface DevboxStorageStackProps extends StackProps {
@@ -85,6 +85,7 @@ export class DevboxStorageStack extends Stack {
           times: ['02:00'],
         },
         retainRule: {
+          // biome-ignore lint/style/noNonNullAssertion: Has been checked above
           interval: config.volume!.backup!.daily!.retained,
           intervalUnit: 'DAYS',
         },
@@ -116,6 +117,7 @@ export class DevboxStorageStack extends Stack {
           cronExpression: 'cron(00 09 ? * SAT *)',
         },
         retainRule: {
+          // biome-ignore lint/style/noNonNullAssertion: Has been checked above
           interval: config.volume!.backup!.weekly!.retained,
           intervalUnit: 'WEEKS',
         },
@@ -129,6 +131,7 @@ export class DevboxStorageStack extends Stack {
           cronExpression: 'cron(00 01 1 * ? *)',
         },
         retainRule: {
+          // biome-ignore lint/style/noNonNullAssertion: Has been checked above
           interval: config.volume!.backup!.monthly!.retained,
           intervalUnit: 'MONTHS',
         },

@@ -1,9 +1,9 @@
 import { UserData } from 'aws-cdk-lib/aws-ec2';
-import { IRole } from 'aws-cdk-lib/aws-iam';
+import type { IRole } from 'aws-cdk-lib/aws-iam';
 import { Asset } from 'aws-cdk-lib/aws-s3-assets';
-import { IConstruct } from 'constructs';
+import type { IConstruct } from 'constructs';
 
-const enum CommandType {
+enum CommandType {
   BeforeAptInstall,
   AptInstall,
   Command,
@@ -27,17 +27,17 @@ export class UserDataBuilder {
   private commands: Command[] = [];
 
   beforeAptInstall(...cmds: string[]): this {
-    this.commands.push(...cmds.map((cmd) => ({ type: CommandType.BeforeAptInstall, cmd } as RegularCommand)));
+    this.commands.push(...cmds.map((cmd) => ({ type: CommandType.BeforeAptInstall, cmd }) as RegularCommand));
     return this;
   }
 
   aptInstall(...pkgs: string[]): this {
-    this.commands.push(...pkgs.map((cmd) => ({ type: CommandType.AptInstall, cmd } as RegularCommand)));
+    this.commands.push(...pkgs.map((cmd) => ({ type: CommandType.AptInstall, cmd }) as RegularCommand));
     return this;
   }
 
   cmd(...cmds: string[]): this {
-    this.commands.push(...cmds.map((cmd) => ({ type: CommandType.Command, cmd } as RegularCommand)));
+    this.commands.push(...cmds.map((cmd) => ({ type: CommandType.Command, cmd }) as RegularCommand));
     return this;
   }
 
@@ -71,7 +71,9 @@ export class UserDataBuilder {
         if (cmd.type === CommandType.Command) {
           userData.addCommands(cmd.cmd);
         } else if (cmd.type === CommandType.S3Copy) {
-          const asset = new Asset(scope, `Asset${++assetCounter}`, { path: cmd.from });
+          const asset = new Asset(scope, `Asset${++assetCounter}`, {
+            path: cmd.from,
+          });
           asset.grantRead(instanceRole);
           userData.addS3DownloadCommand({
             bucket: asset.bucket,

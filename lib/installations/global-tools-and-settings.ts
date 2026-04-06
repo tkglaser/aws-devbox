@@ -1,5 +1,5 @@
 import { runAs } from './utils/ubuntu-commands';
-import { UserDataBuilder } from './utils/user-data-builder';
+import type { UserDataBuilder } from './utils/user-data-builder';
 
 export function globalToolsAndSettings(
   userData: UserDataBuilder,
@@ -8,7 +8,11 @@ export function globalToolsAndSettings(
     userName: string;
     email: string;
     timeZone: string;
-    language: { languagePacks?: string[]; locales?: string[]; defaultLocale: string };
+    language: {
+      languagePacks?: string[];
+      locales?: string[];
+      defaultLocale: string;
+    };
   },
 ) {
   const aptLanguagePacks = (props.language.languagePacks ?? []).map((l) => `language-pack-${l}`);

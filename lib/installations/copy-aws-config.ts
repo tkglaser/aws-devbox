@@ -1,7 +1,7 @@
 import * as path from 'path';
 
 import { chown } from './utils/ubuntu-commands';
-import { UserDataBuilder } from './utils/user-data-builder';
+import type { UserDataBuilder } from './utils/user-data-builder';
 
 export function copyAwsConfig(
   userData: UserDataBuilder,

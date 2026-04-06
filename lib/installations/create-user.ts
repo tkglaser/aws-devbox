@@ -1,5 +1,5 @@
 import { chown } from './utils/ubuntu-commands';
-import { UserDataBuilder } from './utils/user-data-builder';
+import type { UserDataBuilder } from './utils/user-data-builder';
 
 export function createUser(userData: UserDataBuilder, props: { user: string; instance: { defaultUser?: string } }) {
   userData.beforeAptInstall(

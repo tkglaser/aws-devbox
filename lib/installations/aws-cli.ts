@@ -1,4 +1,4 @@
-import { UserDataBuilder } from './utils/user-data-builder';
+import type { UserDataBuilder } from './utils/user-data-builder';
 
 export function awsCli(userData: UserDataBuilder) {
   userData.cmd(

@@ -1,10 +1,10 @@
-import { IPeer, InstanceType, Port, VolumeProps } from 'aws-cdk-lib/aws-ec2';
-import { Schedule } from 'aws-cdk-lib/aws-events';
-import { RoleProps } from 'aws-cdk-lib/aws-iam';
+import type { InstanceType, IPeer, Port, VolumeProps } from 'aws-cdk-lib/aws-ec2';
+import type { Schedule } from 'aws-cdk-lib/aws-events';
+import type { RoleProps } from 'aws-cdk-lib/aws-iam';
 
 export const enum AuthenticationType {
   CREDENTIAL_FILE,
-  INSTANCE_METADATA_ROLE
+  INSTANCE_METADATA_ROLE,
 }
 
 export interface BaseAuthentication {

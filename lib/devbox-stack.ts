@@ -1,18 +1,18 @@
-import { CfnOutput, Stack, StackProps } from 'aws-cdk-lib';
+import { CfnOutput, Stack, type StackProps } from 'aws-cdk-lib';
 import {
   BlockDeviceVolume,
   EbsDeviceVolumeType,
-  ISecurityGroup,
-  ISubnet,
   Instance,
+  type ISecurityGroup,
+  type ISubnet,
   KeyPair,
   MachineImage,
   OperatingSystemType,
-  Volume,
-  Vpc,
+  type Volume,
+  type Vpc,
 } from 'aws-cdk-lib/aws-ec2';
-import { IRole } from 'aws-cdk-lib/aws-iam';
-import { Construct } from 'constructs';
+import type { IRole } from 'aws-cdk-lib/aws-iam';
+import type { Construct } from 'constructs';
 
 import { config } from '../config/config';
 import { StartStopSchedule } from './constructs/start-stop-schedule';
@@ -30,7 +30,11 @@ export class DevboxStack extends Stack {
   constructor(scope: Construct, id: string, props: DevboxStackProps) {
     super(scope, id, props);
 
-    const userData = createUserData({ scope: this, volume: props.volume, instanceRole: props.instanceRole });
+    const userData = createUserData({
+      scope: this,
+      volume: props.volume,
+      instanceRole: props.instanceRole,
+    });
 
     const machineImage = MachineImage.fromSsmParameter(config.instance.amiSsmParameter, {
       os: OperatingSystemType.LINUX,

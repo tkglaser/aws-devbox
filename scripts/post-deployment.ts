@@ -6,10 +6,10 @@ import * as path from 'path';
 import { config } from '../config/config';
 import { env } from '../lib/env';
 import { ec2Client } from '../util/client';
+import { EnvFile } from '../util/env-file';
 import { JsonFile } from '../util/json-file';
 import { runCommand } from '../util/run-command';
 import { TextFile } from '../util/text-file';
-import { EnvFile } from '../util/env-file';
 
 async function main() {
   saveInstanceIdToEnv();

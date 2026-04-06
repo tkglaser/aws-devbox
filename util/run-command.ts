@@ -1,5 +1,5 @@
-import { once } from 'lodash';
 import * as spawn from 'cross-spawn';
+import { once } from 'lodash';
 
 // to help avoid unleashing Zalgo see http://blog.izs.me/post/59142742143/designing-apis-for-asynchrony
 const callLater = (callback: any, ...args: any[]) => {

@@ -1,5 +1,5 @@
 import { $, runAs } from './utils/ubuntu-commands';
-import { UserDataBuilder } from './utils/user-data-builder';
+import type { UserDataBuilder } from './utils/user-data-builder';
 
 export function java(userData: UserDataBuilder, props: { user: string; features: { java?: { package: string } } }) {
   userData

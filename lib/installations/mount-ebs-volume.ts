@@ -1,7 +1,7 @@
-import { Volume } from 'aws-cdk-lib/aws-ec2';
+import type { Volume } from 'aws-cdk-lib/aws-ec2';
 
 import { chown } from './utils/ubuntu-commands';
-import { UserDataBuilder } from './utils/user-data-builder';
+import type { UserDataBuilder } from './utils/user-data-builder';
 
 export function mountExternalVolume(
   userData: UserDataBuilder,

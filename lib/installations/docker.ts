@@ -1,4 +1,4 @@
-import { UserDataBuilder } from './utils/user-data-builder';
+import type { UserDataBuilder } from './utils/user-data-builder';
 
 export function docker(userData: UserDataBuilder, props: { user: string }) {
   userData

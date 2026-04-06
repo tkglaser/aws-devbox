@@ -1,7 +1,7 @@
 import * as path from 'path';
 
 import { chown, runAs } from './utils/ubuntu-commands';
-import { UserDataBuilder } from './utils/user-data-builder';
+import type { UserDataBuilder } from './utils/user-data-builder';
 
 const version = '1.79.2';
 

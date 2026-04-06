@@ -1,5 +1,5 @@
 import { chown, runAs } from './utils/ubuntu-commands';
-import { UserDataBuilder } from './utils/user-data-builder';
+import type { UserDataBuilder } from './utils/user-data-builder';
 
 const installScript = `/tmp/dbi.sh`;
 const bashComp = `/tmp/dbc`;

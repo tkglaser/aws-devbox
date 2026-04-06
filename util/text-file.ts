@@ -2,7 +2,7 @@ import { BaseFile } from './base-file';
 
 export class TextFile extends BaseFile<string[]> {
   static at(...paths: string[]) {
-    return new this(paths);
+    return new TextFile(paths);
   }
 
   protected parse(value: string): string[] {

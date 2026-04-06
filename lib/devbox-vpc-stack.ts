@@ -1,7 +1,14 @@
-import { Stack, StackProps } from 'aws-cdk-lib';
-import { ISecurityGroup, ISubnet, SecurityGroup, SubnetConfiguration, SubnetType, Vpc } from 'aws-cdk-lib/aws-ec2';
-import { IRole, ManagedPolicy, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { Construct } from 'constructs';
+import { Stack, type StackProps } from 'aws-cdk-lib';
+import {
+  type ISecurityGroup,
+  type ISubnet,
+  SecurityGroup,
+  type SubnetConfiguration,
+  SubnetType,
+  Vpc,
+} from 'aws-cdk-lib/aws-ec2';
+import { type IRole, ManagedPolicy, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import type { Construct } from 'constructs';
 
 import { config } from '../config/config';
 
